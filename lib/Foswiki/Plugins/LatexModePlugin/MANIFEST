@@ -2,13 +2,13 @@ lib/Foswiki/Plugins/LatexModePlugin.pm           0644 Plugin Perl module
 lib/Foswiki/Plugins/LatexModePlugin/Init.pm      0644 The initialization module
 lib/Foswiki/Plugins/LatexModePlugin/Render.pm    0644 The rendering module
 lib/Foswiki/Plugins/LatexModePlugin/CrossRef.pm  0644 The cross-referencing module
-pub/Foswiki/LatexModePlugin/expl-v1.4.png        0644 example image of rendered latex |
-pub/Foswiki/LatexModePlugin/tikz-expl.png        0644 image for on-the-fly rendering example
-pub/Foswiki/LatexModePlugin/rot-expl.png         0644 image for attachment rendering example
-data/Foswiki/LatexModePlugin.txt                 0644 Plugin topic and documentation |                             
-data/Foswiki/LatexSymbols.txt                    0644 Comprehensive list of available <nop>LaTeX symbols (1 of 5) 
-data/Foswiki/LatexSymbols2.txt                   0644 Comprehensive list of available <nop>LaTeX symbols (2 of 5) 
-data/Foswiki/LatexSymbols3.txt                   0644 Comprehensive list of available <nop>LaTeX symbols (3 of 5) 
-data/Foswiki/LatexSymbols4.txt                   0644 Comprehensive list of available <nop>LaTeX symbols (4 of 5) 
-data/Foswiki/LatexSymbols5.txt                   0644 Comprehensive list of available <nop>LaTeX symbols (5 of 5) 
-data/Foswiki/LatexIntro.txt                      0644 A basic description of <nop>LaTeX markup conventions 
+pub/System/LatexModePlugin/expl-v1.4.png        0644 example image of rendered latex |
+pub/System/LatexModePlugin/tikz-expl.png        0644 image for on-the-fly rendering example
+pub/System/LatexModePlugin/rot-expl.png         0644 image for attachment rendering example
+data/System/LatexModePlugin.txt                 0644 Plugin topic and documentation |                             
+data/System/LatexSymbols.txt                    0644 Comprehensive list of available <nop>LaTeX symbols (1 of 5) 
+data/System/LatexSymbols2.txt                   0644 Comprehensive list of available <nop>LaTeX symbols (2 of 5) 
+data/System/LatexSymbols3.txt                   0644 Comprehensive list of available <nop>LaTeX symbols (3 of 5) 
+data/System/LatexSymbols4.txt                   0644 Comprehensive list of available <nop>LaTeX symbols (4 of 5) 
+data/System/LatexSymbols5.txt                   0644 Comprehensive list of available <nop>LaTeX symbols (5 of 5) 
+data/System/LatexIntro.txt                      0644 A basic description of <nop>LaTeX markup conventions 

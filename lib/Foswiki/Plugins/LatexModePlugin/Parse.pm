@@ -1,4 +1,8 @@
 # LatexModePlugin::Parse.pm
+# Copyright (C) 2008 W Scott Hoge, shoge at bwh dot harvard dot edu
+#
+# ported from TWiki to Foswiki, Nov 2008
+#
 # Copyright (C) 2006 W Scott Hoge, shoge at bwh dot harvard dot edu
 # Copyright (C) 2006 Evan Chou, chou86.e at gmail dot com
 #
@@ -14,16 +18,16 @@
 # http://www.gnu.org/copyleft/gpl.html
 #
 # =========================
-package TWiki::Plugins::LatexModePlugin::Parse;
+package Foswiki::Plugins::LatexModePlugin::Parse;
 
 use strict;
 
 use vars qw( $VERSION $RELEASE );
 
-=head1 The TWiki LatexModePlugin LaTeX Parse module
+=head1 The Foswiki LatexModePlugin LaTeX Parse module
 
 This module provides the ability to include LaTeX source files
-in TWiki topics.
+in Foswiki topics.
 
 This module is approaching *beta*-level stability.  It has successfully
 rendered a few test examples from mulitiple authors.  But no warranty
@@ -47,7 +51,7 @@ my %commands;
 # only registered commands to run.
 my @regSubs = ( '&addToTitle', '&formThanks', '&handleAuthor', '&makeTitle', '&formBib', '&formInst' );
 
-# open(F,"/var/www/twiki/conf/latex2tml.cfg") or die $!;
+# read in the latex2tml configuration
 while (<DATA>) {
     next if ( length($_) == 0 or $_ =~ m/^\s+$/);
 
@@ -133,11 +137,11 @@ sub printF {
 
 =head2 Syntax
 
-To include full LaTeX source documents in a TWiki topic, insert
+To include full LaTeX source documents in a Foswiki topic, insert
 the text to be converted inbetween the tags %BEGINALLTEX% and
 %ENDALLTEX%.
 
-=begin TML
+=begin foswiki
 
 
 ---+++ Example
@@ -198,7 +202,7 @@ will be converted to
 
 </verbatim>
 
-=end TML
+=end foswiki
 
 =cut
 
@@ -227,8 +231,8 @@ sub handleAlltex
         $pre = $4;     # preamble
         $doc = $5;     # document
 
-        TWiki::Func::getContext()->{'LMPcontext'}->{'preamble'} .= $pre;
-        TWiki::Func::getContext()->{'LMPcontext'}->{'docclass'} .= $1;
+        Foswiki::Func::getContext()->{'LMPcontext'}->{'preamble'} .= $pre;
+        Foswiki::Func::getContext()->{'LMPcontext'}->{'docclass'} .= $1;
         printF($1);
     }
     else {
@@ -236,7 +240,7 @@ sub handleAlltex
         $doc = $math_string;
     }
 
-    if ( exists(TWiki::Func::getContext()->{'genpdflatex'}) ) {
+    if ( exists(Foswiki::Func::getContext()->{'genpdflatex'}) ) {
         # protect latex new-lines at end of physical lines
         $doc =~ s/(\\\\)$/$1  /gs;
         #protect paragraph breaks
@@ -245,14 +249,14 @@ sub handleAlltex
         return('<latex>'.$doc.'</latex>');
     }
 
-    TWiki::Func::getContext()->{'LMPcontext'}->{'title'} = '';
-    TWiki::Func::getContext()->{'LMPcontext'}->{'thanks'} = '';
-    TWiki::Func::getContext()->{'LMPcontext'}->{'thankscnt'} = 0;
+    Foswiki::Func::getContext()->{'LMPcontext'}->{'title'} = '';
+    Foswiki::Func::getContext()->{'LMPcontext'}->{'thanks'} = '';
+    Foswiki::Func::getContext()->{'LMPcontext'}->{'thankscnt'} = 0;
 
     unlink("/tmp/alltex_uH.txt");
     # printF("handleAlltex($params)");
 
-=begin TML
+=begin foswiki
 
 The parsing is done in three stages:
    1. All environments, e.g. =\begin{env} .. \end{env}= are extracted.  Known environments are converted to HTML/TML.  Unknown environments are rendered as images.
@@ -261,39 +265,39 @@ The parsing is done in three stages:
       a. Known commands are converted to HTML/TML.  
       b. Unknown commands are marked as LATEX, for possible rendering in future version of the module or tranlations list.
 
-=end TML
+=end foswiki
 
 =cut
 
     $doc = protectVerbatim( $doc );
     &mathShortToLong($doc);
     $doc = extractEnvironments( $doc )
-        if ($TWiki::Plugins::LatexModePlugin::Parse::RELEASE > 0.01);
+        if ($Foswiki::Plugins::LatexModePlugin::Parse::RELEASE > 0.01);
 
     $doc = extractBlocks( $doc )
-        if ($TWiki::Plugins::LatexModePlugin::Parse::RELEASE > 0.01);
+        if ($Foswiki::Plugins::LatexModePlugin::Parse::RELEASE > 0.01);
 
     $doc = extractSimple( $doc )
-        if ($TWiki::Plugins::LatexModePlugin::Parse::RELEASE > 0.01);
+        if ($Foswiki::Plugins::LatexModePlugin::Parse::RELEASE > 0.01);
 
 
 =pod
 
-The output will be rendered in HTML by default.  Alternatively,
-one can render the output in TWiki Markup (TML).  This is achieved
-by declaring 
+The output will be rendered in HTML by default.  Alternatively, one
+can render the output in Foswiki Topic Markup Language (TML).  This is
+achieved by declaring
 
    * Set LATEXMODEPLUGIN_ALLTEXMODE = tml
 
-as a topic/web/twiki-wide preference setting, or by passing in =tml= as
+as a topic/web/wiki-wide preference setting, or by passing in =tml= as
 the =latex= parameter on view.  e.g. 
 <a href="%TOPIC%?latex=tml">%TOPIC%?latex=tml</a>
 
 The option of TML output is provided for the following reason: it
-is unlikely that all portions of the .tex to TWiki topic
+is unlikely that all portions of the .tex to Foswiki topic
 conversion will render successfully.  [ The I<parser> in almost
 complete. The I<converter>? not so much. ;-) ] With a .tex to TML
-converter in place, one can copy-and-paste the twiki markup to
+converter in place, one can copy-and-paste the topic markup to
 another topic to correct the rendering problems.
 
 =cut
@@ -308,7 +312,7 @@ another topic to correct the rendering problems.
     close(F);
 
     $doc = "<verbatim>\n".$doc."\n</verbatim>\n"
-    if ( TWiki::Func::getContext()->{'LMPcontext'}->{'alltexmode'} );
+    if ( Foswiki::Func::getContext()->{'LMPcontext'}->{'alltexmode'} );
     #we are done!
     return($doc);
 
@@ -377,7 +381,7 @@ sub extractSimple {
 sub convertSimple
 {
     
-    # $simple{'\\maketitle'} = TWiki::Func::getContext()->{'LMPcontext'}->{'title'}."\n<br>\n".TWiki::Func::getContext()->{'LMPcontext'}->{'thanks'}."\n<br>\n";
+    # $simple{'\\maketitle'} = Foswiki::Func::getContext()->{'LMPcontext'}->{'title'}."\n<br>\n".Foswiki::Func::getContext()->{'LMPcontext'}->{'thanks'}."\n<br>\n";
 
     $_[0]=~s/\\maketitle/&makeTitle()/e;
 
@@ -425,7 +429,7 @@ sub convertEmbed
     return($b);
 }
 
-# use base qw( TWiki::Plugins::LatexModePlugin );
+# use base qw( Foswiki::Plugins::LatexModePlugin );
 
 sub expandSpecialChars {
     return;
@@ -477,7 +481,7 @@ sub expandComplexBlocks {
         $str =~ s/\$o/$opts/;
         $str =~ s/\$c/$cmd/;
         
-        # ensure that twiki section commands land at the start
+        # ensure that foswiki section commands land at the start
         # of a new line
         $str = "\n\n".$str if ($str=~m/^\-\-\-/); 
         
@@ -616,7 +620,7 @@ sub extractBlocks {
         } elsif ( ($pre =~ m/[A-Z]+$/) || 
                   ($doc =~ m/^\%/) ){
             # printF("++ $pre ++ $block ++ $doc\n");
-            # protect twiki commands, like %BEGINFIGURE{ ... }%
+            # protect foswiki macros, like %BEGINFIGURE{ ... }%
             $block = $pre.$block.substr($doc,0,1,'');
             printF("protecting '$block'\n");
         } else {
@@ -731,7 +735,7 @@ sub extractBlocks {
             #
             $b = convertEmbed($b);
             (my $c=$b)=~s/%BEGINLATEX.*?ENDLATEX%//gs;
-            $c=~s/%\p{IsUpper}+?\{.*\}%//gs; # take out all twiki tags
+            $c=~s/%\p{IsUpper}+?\{.*\}%//gs; # take out all foswiki macros
             # should probably look for nested tags
             
             $b = extractBlocks($b) if ($c=~m/\{.*\}/);
@@ -858,7 +862,7 @@ abstract, bibliography, keywords
 
 =end html
 
-LaTeX enviroments that are I<not supported> are passed to the TWiki
+LaTeX enviroments that are I<not supported> are passed to the Foswiki
 LaTeX rendering engine to generate an image.  For nested
 environments, image rendering occurs at the first unrecognized enviroment.
 
@@ -1027,7 +1031,7 @@ sub convertEnvironment
             if ($caption =~ m/\\/) {
                 # $caption = convertEmbed( $caption );
                 $caption = extractEnvironments($caption);
-                # captions are stored in the TWiki tag, which is not
+                # captions are stored in the Foswiki tag, which is not
                 # processed later... so process the contents now.
                 $caption = extractBlocks( $caption );
                 $caption =~ s/([\"])/\\$1/g;
@@ -1054,7 +1058,7 @@ sub convertEnvironment
     }
     elsif ($bname =~ /bibliography/) {
         # for this to work, the LatexModePlugin must precede the BibtexPlugin
-        # i.e. in LocalSite.cfg: $TWiki::cfg{PluginsOrder} = 'SpreadSheetPlugin,LatexModePlugin,BibtexPlugin';
+        # i.e. in LocalSite.cfg: $Foswiki::cfg{PluginsOrder} = 'SpreadSheetPlugin,LatexModePlugin,BibtexPlugin';
         my $env = $block;
         $env =~ s!\\begin\{$bname\*?\}(\{\d+\})?!!;
         $env =~ s!\\end\{$bname\*?\}!!;
@@ -1086,7 +1090,7 @@ sub convertEnvironment
 }
 
 
-## derived from code contributed by TWiki:Main.EvanChou 
+## derived from code contributed by Foswiki:Main.EvanChou 
 #
 #
 #helper function that grabs the right tag (no need for weird divtree)
@@ -1203,7 +1207,7 @@ use Foswiki:Extensions.PerlDocPlugin to see a complete list of supported command
 
 =end man
 
-=begin TML
+=begin foswiki
 
    * commands with reasonably complete support (.tex --> HTML/TML)
       * section, subsection, subsubsection
@@ -1223,7 +1227,7 @@ use Foswiki:Extensions.PerlDocPlugin to see a complete list of supported command
    * commands that are ignored
       * vspace, hspace, vfill, noindent, sloppy, mainmatter
 
-=end TML
+=end foswiki
 
 All mathmode commands are supported, as all mathmode enviroments are
 rendered as an image using the background C<latex> engine.  Commands
@@ -1234,11 +1238,11 @@ however.
 
 =head2 Installation
 
-For now, the TWiki::Plugins::LatexModePlugin::Parse module is only
-available on the TWiki SVN development tree, 
-<a href="http://svn.twiki.org:8181/svn/twiki/branches/TWikiRelease04x00/twikiplugins/LatexModePlugin/lib/TWiki/Plugins/LatexModePlugin">here</a>.
+For now, the Foswiki::Plugins::LatexModePlugin::Parse module is only
+available on the Foswiki SVN development tree, 
+<a href="http://svn.foswiki.org/trunk/LatexModePlugin/lib/Foswiki/Plugins/LatexModePlugin">here</a>.
 Download the Parse.pm file and copy it to the
-C<lib/TWiki/Plugins/LatexModePlugin/> directory of your TWiki
+C<lib/Foswiki/Plugins/LatexModePlugin/> directory of your Foswiki
 installation.  Documentation for the module is provided in 
 C<pod> format, and can be completely viewed using the Foswiki:Extensions.PerlDocPlugin 
 or partially viewed using C<perldoc> or C<pod2text>.
@@ -1320,18 +1324,17 @@ solution.
 
 =head3 Including Graphics
 
-There are many ways to include graphics in latex files.  So, I figured the most reasonable way to support them all is to render them using the backend image rendering.  As of Foswiki:Extensions.LatexModePlugin v3.3, the rendering of images in TWiki can be done dynamically using =dvipng=, =dvips=, or =pdflatex=.  So, to render images in twiki, one can 
+There are many ways to include graphics in latex files.  So, I figured the most reasonable way to support them all is to render them using the backend image rendering.  As of Foswiki:Extensions.LatexModePlugin v3.3, the rendering of images in Foswiki can be done dynamically using =dvipng=, =dvips=, or =pdflatex=.  So, to render images in Foswiki, one can 
    * use the =includegraphics= command from the =graphicx= package, but do not declare the filename extension.
    * attach the image to the topic, with the file type extension stated. <br> The Plugin recognizes .eps, .pdf, .png, and .jpg file types.
    * the correct rendering engine will be called based on the image filename extension.
 
-Alternatively, one can write a custom TWiki macro to handle attached .pdf images (e.g. %SHOWPDF{image.pdf}%), and then use a translation declaration to render the image (e.g. =:\includegraphics:1:%SHOWPDF{$1}%:=).
+Alternatively, one can write a custom Foswiki macro to handle attached .pdf images (e.g. %SHOWPDF{image.pdf}%), and then use a translation declaration to render the image (e.g. =:\includegraphics:1:%SHOWPDF{$1}%:=).
 
 
 =head2 Acknowledgements
 
-Thanks to <a href="http://twiki.org/cgi-bin/view/Main/EvanChou">EvanChou</a> for the inspiration for taking this on, and for
-providing the core parsing routines.
+Thanks to <a href="http://twiki.org/cgi-bin/view/Main/EvanChou">EvanChou</a> for the inspiration for taking this on, and for providing the core parsing routines.
 
 
 =cut
@@ -1339,15 +1342,15 @@ providing the core parsing routines.
 sub storeVerbatim {
     my $t = $_[0];
     $t =~ s/\s/_/g if ( ($_[1]) and ($_[1] eq '*'));
-    $t =~ s/(^\s+)|(\s+$)//g;   # TWiki requires no spaces between '=' and verbatim line
+    $t =~ s/(^\s+)|(\s+$)//g;   # Foswiki requires no spaces between '=' and verbatim line
 
-    push( @{ TWiki::Func::getContext()->{'LMPcontext'}->{'verb'} }, $t );
-    return( scalar( @{ TWiki::Func::getContext()->{'LMPcontext'}->{'verb'} } ) - 1 );
+    push( @{ Foswiki::Func::getContext()->{'LMPcontext'}->{'verb'} }, $t );
+    return( scalar( @{ Foswiki::Func::getContext()->{'LMPcontext'}->{'verb'} } ) - 1 );
 }
 
 sub extractVerbatim {
 
-    my @a = @{ TWiki::Func::getContext()->{'LMPcontext'}->{'verb'} };
+    my @a = @{ Foswiki::Func::getContext()->{'LMPcontext'}->{'verb'} };
 
     my $block = $a[ $_[0] ];
 
@@ -1363,21 +1366,21 @@ sub addToTitle {
 
     my ($str) = @_;   
 
-    TWiki::Func::getContext()->{'LMPcontext'}->{'title'} .= $str."\n";
-    printF( "title now:\n".TWiki::Func::getContext()->{'LMPcontext'}->{'title'} );
+    Foswiki::Func::getContext()->{'LMPcontext'}->{'title'} .= $str."\n";
+    printF( "title now:\n".Foswiki::Func::getContext()->{'LMPcontext'}->{'title'} );
     return('');
 }
 
 sub formThanks {
     my ($str) = @_;
 
-    my $cnt =   TWiki::Func::getContext()->{'LMPcontext'}->{'thankscnt'};
+    my $cnt =   Foswiki::Func::getContext()->{'LMPcontext'}->{'thankscnt'};
     $cnt = $cnt + 1;
 
-    TWiki::Func::getContext()->{'LMPcontext'}->{'thanks'} .=
+    Foswiki::Func::getContext()->{'LMPcontext'}->{'thanks'} .=
         $cnt.'. '.$str."<br>\n";
 
-    TWiki::Func::getContext()->{'LMPcontext'}->{'thankscnt'} = $cnt;
+    Foswiki::Func::getContext()->{'LMPcontext'}->{'thankscnt'} = $cnt;
 
     # return( '%BEGINLATEX{inline="1"}% $^'.$cnt.'$ %ENDLATEX%' );
     return( '<sup>'.$cnt.'</sup>' );
@@ -1385,9 +1388,9 @@ sub formThanks {
 }
 
 sub makeTitle {
-    my $t = TWiki::Func::getContext()->{'LMPcontext'}->{'title'}.
+    my $t = Foswiki::Func::getContext()->{'LMPcontext'}->{'title'}.
         "\n<br>\n".
-        TWiki::Func::getContext()->{'LMPcontext'}->{'thanks'}.
+        Foswiki::Func::getContext()->{'LMPcontext'}->{'thanks'}.
         "\n<br>\n";
     return( $t );
 }
@@ -1397,11 +1400,11 @@ sub formBib {
     printF("formBib: $str ");
 
     if ($str =~ m/style\=/) {
-        TWiki::Func::getContext()->{'LMPcontext'}->{'bibstyle'} = $str;
+        Foswiki::Func::getContext()->{'LMPcontext'}->{'bibstyle'} = $str;
         return('');
     } else {
 
-        my $style = TWiki::Func::getContext()->{'LMPcontext'}->{'bibstyle'};
+        my $style = Foswiki::Func::getContext()->{'LMPcontext'}->{'bibstyle'};
         my @files = ();
         $str =~ s/.*?\=\"(.*)\"$/$1/;
         foreach my $f (split(/\,/,$str)) {
@@ -1429,14 +1432,14 @@ sub formInst {
     my ($str) = @_;
     my @a = split(/\\and/,$str);
 
-    my $cnt =   TWiki::Func::getContext()->{'LMPcontext'}->{'thankscnt'};
+    my $cnt =   Foswiki::Func::getContext()->{'LMPcontext'}->{'thankscnt'};
     foreach (@a) {
         $cnt = $cnt + 1;
 
-        TWiki::Func::getContext()->{'LMPcontext'}->{'thanks'} .=
+        Foswiki::Func::getContext()->{'LMPcontext'}->{'thanks'} .=
             $cnt.'. '.$_."<br>\n";
 
-        TWiki::Func::getContext()->{'LMPcontext'}->{'thankscnt'} = $cnt;
+        Foswiki::Func::getContext()->{'LMPcontext'}->{'thankscnt'} = $cnt;
     }
 }
 
