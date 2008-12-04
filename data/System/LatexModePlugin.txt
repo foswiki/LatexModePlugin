@@ -1,7 +1,7 @@
 
 ---+!! <nop>%TOPIC%
 
-This <nop>LaTeX Mode TWiki Plugin allows you to include <nop>LaTeX mark up commands within a TWiki page.  It uses external programs (specifically latex, dvipng or dvips-and-convert, or mimetex) to generate =png= or =gif= images from the mark up.  These images are then included in the rendered TWiki page.  The first time a particular image is generated, there may be a significant lag in page rendering as the images are generated on the server.  Once rendered, the image is saved as an attached file for the page, so subsequent viewings will not require re-renders.  When you remove a math expression from a page, its image is deleted.  
+This <nop>LaTeX Mode Plugin allows you to include <nop>LaTeX mark up commands within a Foswiki page.  It uses external programs (specifically latex, dvipng or dvips-and-convert, or mimetex) to generate =png= or =gif= images from the mark up.  These images are then included in the rendered Foswiki page.  The first time a particular image is generated, there may be a significant lag in page rendering as the images are generated on the server.  Once rendered, the image is saved as an attached file for the page, so subsequent viewings will not require re-renders.  When you remove a math expression from a page, its image is deleted.  
 
 This plugin expands the functionality provided by the Foswiki:Extensions.MathModePlugin.
 
@@ -67,7 +67,7 @@ Additional options can be included to modify the rendered result.  These include
 | engine | {"", "dvipng", "ps", "pdf", "mimetex"} | "" | dynamically switch the rendering engine between the installation default (""), =dvipng=,  =dvips+convert=, =pdflatex+convert=, or =mimetex= for <nop>LaTeX packages than need it, e.g. tikz. (details below) |
 </div>
 
-For example, to declare an equation to be numbered by TWiki (not in the <nop>LaTeX image) with a larger font size and in red, use the following syntax:
+For example, to declare an equation to be numbered by Foswiki (not in the <nop>LaTeX image) with a larger font size and in red, use the following syntax:
 
 <blockquote>
 %<nop>BEGINLATEX{label="eq1" density="175" color="red"}%
@@ -109,7 +109,7 @@ Latex is able to render colors defined in 3 color spaces: =gray=, =rgb=, and
 |   =yellow=|   cmyk   | 0,0,1,0 |
 </div>
 
-For convenience, the following TWiki colors are pre-defined in the LatexModePlugin
+For convenience, the following Foswiki colors are pre-defined in the LatexModePlugin
 <verbatim>
    \definecolor{Red}{rgb}{1,0,0}
    \definecolor{Blue}{rgb}{0,0,1}
@@ -202,7 +202,7 @@ It will render as:<br><br>
 <img src="%ATTACHURL%/tikz-expl.png" alt="TiKZ example">
 </table>
 
-This enables a wide variety of <nop>LaTeX packages to be used within TWiki.
+This enables a wide variety of <nop>LaTeX packages to be used within Foswiki.
 For example: simple image manipulations using the =graphicx= package.
 Note that the package must be declared in the <nop>LaTeX preamble.
 <table>
@@ -236,7 +236,7 @@ To keep the counters/cross-references seperate for each of the three types of re
 The =span= option is used only by Foswiki:Extensions.GenPDFLatex, giving the ability to designate the width of a table or figure in two-column styles. (e.g. for Figures, it expands to =\begin{figure*} ... \end{figure*}=.)  The default span is one-column. 
 
 Sections can be numbered and labeled, for easy cross-referencing.  To label
-a section, add a %<nop>SECLABEL{_label_}% tag after the TWiki section
+a section, add a %<nop>SECLABEL{_label_}% tag after the Foswiki section
 command. E.g.,
 <verbatim>
    ---++ %SECLABEL{sec:intro}% Introduction
@@ -256,7 +256,7 @@ The default setting is '0', which disables the numbering and section labels.
 In <nop>LaTeX, the preamble is used to customize the latex processing,
 allowing one to add custom styles and declare new commands.
 
-In TWiki, the preamble can be set as either a web or topic preference variable
+In Foswiki, the preamble can be set as either a web or topic preference setting
 <verbatim>
 	* #Set PREAMBLE = \usepackage{color} \definecolor{Aqua}{rgb}{0,1,1}
 </verbatim>
@@ -266,18 +266,18 @@ or as a multi-line declaration, using the tags:
 </verbatim>
 
 One critical difference between the two exists.  With the exception of the
-color declarations above, the TWiki preference setting will _override_ the
+color declarations above, the Foswiki preference setting will _override_ the
 default settings, and is intended to provide site administrators a central
 point to set preamble settings globally.  In contrast, the tag declaration
 will _add_ to the preamble defined by either the default settings or the
-preference setting, allowing TWiki users to amend the preamble.
+preference setting, allowing Foswiki users to amend the preamble.
 
 
 ---+++ Common Symbols
 
    * [[http://www.math.utep.edu/temp/Epoch/nasaepoch/node51.html][Math Symbols Commonly Used in Latex]] 
 
-Since the !LatexModePlugin is not installed on TWiki.org the above external html reference is given so that you can see what the symbols are.  For those who do use Latex in your TWiki install, you can copy the tables formatted for TWiki from the following topics (the symbols won't actually display without the plugin).
+Since the !LatexModePlugin is not installed on Foswiki.org the above external html reference is given so that you can see what the symbols are.  For those who do use Latex in your Foswiki install, you can copy the tables formatted for Foswiki from the following topics (the symbols won't actually display without the plugin).
 
 What to type to get a variety of symbols using Latex.  Due to page loading constraints, the symbols tables are split up into 5 different topics.
    * LatexSymbols (Greek Letters)
@@ -289,11 +289,11 @@ What to type to get a variety of symbols using Latex.  Due to page loading const
 
 ---++ Plugin Settings
 
-Plugin settings are stored as preferences variables. To reference
+Plugin settings are stored as preferences settings. To reference
 these plugin settings write ==%<nop>&lt;plugin&gt;_&lt;setting&gt;%==, i.e. ==%<nop>LATEXMODEPLUGIN_SHORTDESCRIPTION%==
 
 	* One line description, as shown in the %SYSTEMWEB%.TextFormattingRules topic:
-		* Set SHORTDESCRIPTION = Enables <nop>LaTeX markup (mathematics and more) in TWiki topics
+		* Set SHORTDESCRIPTION = Enables <nop>LaTeX markup (mathematics and more) in Foswiki topics
 
 	* Debug plugin: (See output in =data/debug.txt=)
 		* Set DEBUG = 0
@@ -320,7 +320,7 @@ in the topic !WEB.WebPreferences.
 
 ---+++ Plugin Installation Instructions
 
-First, confirm that the external software needed by the plugin is installed on the TWiki server.  This includes:
+First, confirm that the external software needed by the plugin is installed on the Foswiki server.  This includes:
 	* The =Digest::MD5= and =Image::Info= perl modules.
 	* A mechanism to convert !LaTeX markup to images.  This is either
 		* A working <nop>LaTeX implementation ([[http://www.tug.org/tetex/][tetex]] and <nop>[[http://www.miktex.org/][MikTeX]] are two popular choices)
@@ -332,42 +332,42 @@ First, confirm that the external software needed by the plugin is installed on t
 
 Rendering can be performed by (=latex= and =dvipng=) or (=latex= and =dvips=
 and =convert=) or (=pdflatex= and =convert=) or (=mimetex=).  The first
-three options allow one to include almost any !LaTeX markup in a TWiki
+three options allow one to include almost any !LaTeX markup in a Foswiki
 topic, whereas =mimetex= has very limited functionality.  Among the first
 three options, =dvipng= is the fastest by a significant margin.  The
 =tweakinline= processing (v2.5 and above) to align the baseline of !LaTeX
 expressions with HTML text uses =convert=.
 
 =mimetex= can be used in server environments where a full !LaTeX
-installation is impractical (e.g. TWiki:Codev.TWikiOnMemoryStick).  mimetex
-provides rendering of equations independently of external font files.
-This provides a very lightweight and fast mechanism to show equations.  
-However, the number of colors is limited to 4 (black, red, blue, green)
-and only the mathmode and picture !LaTeX environments are supported.
-Also, the preamble, density, and gamma settings are ignored.
+installation is impractical (e.g. on shared-server installations).  mimetex
+provides rendering of equations independently of external font files.  This
+provides a very lightweight and fast mechanism to show equations.  However,
+the number of colors is limited to 4 (black, red, blue, green) and only the
+mathmode and picture !LaTeX environments are supported.  Also, the preamble,
+density, and gamma settings are ignored.
 
 Second,
 	* Download the ==%TOPIC%.zip== file from the Plugin web %BR%
-          %ICON{warning}% Note: versions 3.0 and above are compatible only with TWiki 4.x.x.  If you are running an earlier version of TWiki, (i.e. Cairo) [[http://twiki.org/cgi-bin/viewfile/Plugins/LatexModePlugin?rev=14;filename=LatexModePlugin.zip][download v2.62 (25 Sep 2006)]] instead. %ICON{warning}%
+          %ICON{warning}% Note: versions 4.0 and above are compatible only with Foswiki 1.x.x. %ICON{warning}%
 
-	* Unzip ZIP file in your twiki installation directory. Content:
+	* Unzip ZIP file in your Foswiki installation directory. Content:
    | *File:* | *Description:* |
 %$MANIFEST%
 
-Finally, customize the installation specific variables.
-	* Set the local disk paths for the rendering methods employed.  This can be done by copying the needed lines from the following list to =lib/LocalSite.cfg= or =lib/TWiki.cfg=.
-      *  $TWiki::cfg{Plugins}{LatexModePlugin}{latex} = '/usr/bin/latex';
-      *  $TWiki::cfg{Plugins}{LatexModePlugin}{pdflatex} = '/usr/bin/pdflatex';
-      *  $TWiki::cfg{Plugins}{LatexModePlugin}{dvips} = '/usr/bin/dvips';
-      *  $TWiki::cfg{Plugins}{LatexModePlugin}{dvipng} = '/usr/bin/dvipng';
-      *  $TWiki::cfg{Plugins}{LatexModePlugin}{convert} = '/usr/X11R6/bin/convert';
-      *  $TWiki::cfg{Plugins}{LatexModePlugin}{mimetex} = '/usr/bin/mimetex';
+Finally, customize the installation specific configuration settings.
+	* Set the local disk paths for the rendering methods employed.  This can be done by copying the needed lines from the following list to =lib/LocalSite.cfg=
+      *  $Foswiki::cfg{Plugins}{LatexModePlugin}{latex} = '/usr/bin/latex';
+      *  $Foswiki::cfg{Plugins}{LatexModePlugin}{pdflatex} = '/usr/bin/pdflatex';
+      *  $Foswiki::cfg{Plugins}{LatexModePlugin}{dvips} = '/usr/bin/dvips';
+      *  $Foswiki::cfg{Plugins}{LatexModePlugin}{dvipng} = '/usr/bin/dvipng';
+      *  $Foswiki::cfg{Plugins}{LatexModePlugin}{convert} = '/usr/X11R6/bin/convert';
+      *  $Foswiki::cfg{Plugins}{LatexModePlugin}{mimetex} = '/usr/bin/mimetex';
    * Modify the following if needed. %BR% 
-      *  $TWiki::cfg{Plugins}{LatexModePlugin}{donotrenderlist} %BR% declare a comma-separated list of <nop>LaTeX commands that _will not be rendered_.  %BR% Default = ='input,include,catcode'=.
-      *  $TWiki::cfg{Plugins}{LatexModePlugin}{tweakinline} %BR% Turned off by default, if this variable is set to =1= the plugin will attempt to align the baseline of the rendered in-line math with the baseline of the HTML text.
-      *  $TWiki::cfg{Plugins}{LatexModePlugin}{bypassattach} %BR% Turned off by default, setting this boolean variable to =1= will force file creation to use direct file stores and bypass the saveAttach mechanism in TWiki4.  Saves a bit of processing overhead.
-      *  $TWiki::cfg{Plugins}{LatexModePlugin}{engine} %BR% This sets the default rendering engine %BR% Default: 'dvipng'
-      *  $TWiki::cfg{Plugins}{LatexModePlugin}{imagetype} %BR% This sets the image format for the generated files.  Valid types are png and gif.  %BR% Default:  'png'
+      *  $Foswiki::cfg{Plugins}{LatexModePlugin}{donotrenderlist} %BR% declare a comma-separated list of <nop>LaTeX commands that _will not be rendered_.  %BR% Default = ='input,include,catcode'=.
+      *  $Foswiki::cfg{Plugins}{LatexModePlugin}{tweakinline} %BR% Turned off by default, if this is set to =1= the plugin will attempt to align the baseline of the rendered in-line math with the baseline of the HTML text.
+      *  $Foswiki::cfg{Plugins}{LatexModePlugin}{bypassattach} %BR% Turned off by default, setting this boolean setting to =1= will force file creation to use direct file stores and bypass the saveAttach mechanism in Foswiki.  Saves a bit of processing overhead.
+      *  $Foswiki::cfg{Plugins}{LatexModePlugin}{engine} %BR% This sets the default rendering engine %BR% Default: 'dvipng'
+      *  $Foswiki::cfg{Plugins}{LatexModePlugin}{imagetype} %BR% This sets the image format for the generated files.  Valid types are png and gif.  %BR% Default:  'png'
 
 
 ---+++ Security
@@ -375,13 +375,13 @@ Finally, customize the installation specific variables.
 Aside from providing beautiful rendering of mathematics, !LaTeX is
 _fundamentally_ a programming language.  Before installation of this plugin,
 one should consider the implications of exposing access to a programming
-language on a web server.  TWiki's use of access control can mitigate some
+language on a web server.  Foswiki's use of access control can mitigate some
 of the risk, by limiting access to trusted users.  Complementary to this
 approach, one can prevent certain commands from being rendered using the
 ={donotrenderlist}= configuration setting.
 
 To start, before installing the Plugin, one should modify the =texmf.cnf=
-file on the sever to the following variables:
+file on the server to the following variables:
 <verbatim>
     shell_escape = f
     openout_any = p
@@ -403,12 +403,12 @@ finish its processing.  This can be done in Apache via
 Version control is not specifically used for the image files.  Because the images are generated from the raw text, the topic history includes all the versions of the markup for the expressions, and can be re-rendered when you view a different version.
 
 
-This plugin is an enhanced version of the Foswiki:Extensions.MathModePlugin maintained by TWiki:Main.MichaelDaum.  There are a number of significant differences:
+This plugin is an enhanced version of the Foswiki:Extensions.MathModePlugin maintained by Foswiki:Main.MichaelDaum.  There are a number of significant differences:
 	* equations, tables, and figures can be numbered, with automatic cross-links available
 	* if errors occur during the latex markup processing, they are reported during the editing =preview= screen, but not during the standard =view=.  The motivation for this is that, in general, _authors_ care about the error but _readers_ do not.
-	* as of version 2.5, one can force the recreation of all latex images in a topic.  To do this, add the following text (similar to raw text rendering) to the end of the URL: =?latex=rerender=.  E.g. changing =http<nop>://localhost/twiki/bin/view/TWiki/LatexModePlugin= to  =http<nop>://localhost/twiki/bin/view/TWiki/LatexModePlugin?latex=rerender= will force all of the images to be redrawn.
-	* as of version 2.6, one can bypass the file attachment code in TWiki 4.x.x.  TWiki 4.x.x and above is designed to accommodate non-filesystem-storage (i.e. databases) for attachments.  This plugin has supported this interface since v2.0.  However, using the TWiki4 attachment storage mechanism adds a significant delay in plugin response time.  So, a new configuration setting has been introduced to allow admins to bypass the TWiki4 interface and use direct file-system stores if they so choose.  To activate, set <verbatim>
-	$TWiki::cfg{Plugins}{LatexModePlugin}{bypassattach} = 1;
+	* as of version 2.5, one can force the recreation of all latex images in a topic.  To do this, add the following text (similar to raw text rendering) to the end of the URL: =?latex=rerender=.  E.g. changing =http<nop>://localhost/foswiki/bin/view/System/LatexModePlugin= to  =http<nop>://localhost/foswiki/bin/view/System/LatexModePlugin?latex=rerender= will force all of the images to be redrawn.
+	* as of version 2.6, one can bypass the file attachment code in Foswiki 4.x.x.  Foswiki 4.x.x and above is designed to accommodate non-filesystem-storage (i.e. databases) for attachments.  This plugin has supported this interface since v2.0.  However, using the Foswiki4 attachment storage mechanism adds a significant delay in plugin response time.  So, a new configuration setting has been introduced to allow admins to bypass the Foswiki4 interface and use direct file-system stores if they so choose.  To activate, set <verbatim>
+	$Foswiki::cfg{Plugins}{LatexModePlugin}{bypassattach} = 1;
 </verbatim> in =LocalSite.cfg=
 
 ---++ Additional Resources (external)
@@ -421,9 +421,13 @@ This plugin is an enhanced version of the Foswiki:Extensions.MathModePlugin main
 
 ---++ Plugin Info
 
-|  Plugin Author: | TWiki:Main.ScottHoge |
-|  Plugin Version: | 02 Dec 2007 (v 3.72, SVN:%$VERSION%)  |
-|  Change History: | %ICON{warning}% v3.0 and above requires TWiki 4.x.x and above %ICON{warning}% <!-- versions below in reverse order --> |
+|  Plugin Author: | Foswiki:Main.ScottHoge |
+|  Plugin Version: | 23 Nov 2008 (v 4.0, SVN:%$VERSION%)  |
+|  Change History: | %ICON{warning}% v4.0 and above requires Foswiki 1.x.x and above %ICON{warning}% <!-- versions below in reverse order --> |
+|   23 Nov 2008 (v 4.0) | a few bug fixes. ported to Foswiki |
+|  Change History: | %ICON{warning}% v3.x requires TWiki 4.x.x and above %ICON{warning}% <!-- versions below in reverse order --> |
+|   27 Oct 2008 (v 3.74) | replaced plugin init with lazy-loading, to fix installer bug |
+|   24 Jun 2008 (v 3.73) | fewer bugs: TOC interaction corrected, cant-see-mimetex-images-in-win32 bug fixed |
 |   02 Dec 2007 (v 3.72) | more bug fixes: sync doc to code, fixed trimline v2 for ps engine |
 |   15 Nov 2007 (v 3.71) | minor bug fixes: DEFAULTENGINE, doc changes, improved the 'stale time' in delete-image-check |
 |  -- Apr 2007 (v 3.62) | added =-halt-on-error= for better error handling. Fixed =debug= variable in Init.pm |
@@ -451,7 +455,7 @@ This plugin is an enhanced version of the Foswiki:Extensions.MathModePlugin main
 |  29 Sep 2005 (v 1.4) | more robust scrubing of =convert= input parameters. errors on =save= now reported. |
 |   5 Sep 2005 (v 1.3) | added image scale parameter, color rendering, and preamble hooks | 
 |  22 Aug 2005 (v 1.2) | Forked from the Foswiki:Extensions.MathModePlugin by TWiki:Main.GraemeLufkin |
-|  TWiki Dependency: | $TWiki::Plugins::VERSION 1.025, Foswiki:Extensions.DakarContrib |
+|  Foswiki Dependency: | $Foswiki::Plugins::VERSION 2.0 |
 |  CPAN Dependencies: | CPAN:Digest::MD5, CPAN:File::Basename, CPAN:Image::Info |
 |  Other Dependencies: | A working installation of =latex=.  A working installation of =convert= or =dvipng=. |
 |  Perl Version: | 5.8.0 |

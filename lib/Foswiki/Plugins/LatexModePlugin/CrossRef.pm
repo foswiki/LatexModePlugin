@@ -1,4 +1,8 @@
 # LatexModePlugin::CrossRef.pm
+# Copyright (C) 2008 W Scott Hoge, shoge at bwh dot harvard dot edu
+#
+# ported from TWiki to Foswiki, Nov 2008
+#
 # Copyright (C) 2005-2006 W Scott Hoge, shoge at bwh dot harvard dot edu
 # Copyright (C) 2002 Graeme Lufkin, gwl@u.washington.edu
 #
@@ -20,7 +24,7 @@
 #
 # =========================
 
-package TWiki::Plugins::LatexModePlugin::CrossRef;
+package Foswiki::Plugins::LatexModePlugin::CrossRef;
 
 use strict;
 
@@ -29,7 +33,7 @@ sub handleSections {
     my ($l,$e,$lbltag,$text) = @_;
     my $cl = length($l);
 
-    my $MAXDEPTH = TWiki::Func::getContext()->{'LMPcontext'}->{'maxdepth'};
+    my $MAXDEPTH = Foswiki::Func::getContext()->{'LMPcontext'}->{'maxdepth'};
 
     my $label = '';
     if ($lbltag and ($lbltag =~ m/\{(.*?)\}/)) {
@@ -38,30 +42,30 @@ sub handleSections {
     }
 
     my $ret = '---'.$l.$e.' '.$text." \n";
-    if (exists(TWiki::Func::getContext()->{'genpdflatex'})) {
+    if (exists(Foswiki::Func::getContext()->{'genpdflatex'})) {
         $ret .= '<latex>\label{'.$label."}</latex>\n" if ($label ne '');
         return($ret);
     }
     return('---'.$ret) if ( ($cl > $MAXDEPTH) );
 
     
-    TWiki::Func::getContext()->{'LMPcontext'}->{'sec'.$cl.'cnt'} += 1;
+    Foswiki::Func::getContext()->{'LMPcontext'}->{'sec'.$cl.'cnt'} += 1;
 
     my $sn = '';
     for my $c ( 1 .. $cl ) {
-        $sn .= TWiki::Func::getContext()->{'LMPcontext'}->{'sec'.$c.'cnt'} ;
+        $sn .= Foswiki::Func::getContext()->{'LMPcontext'}->{'sec'.$c.'cnt'} ;
         $sn .= '.' if $c < $cl;
     }
 
-    if ( $cl < TWiki::Func::getContext()->{'LMPcontext'}->{'curdepth'} )
+    if ( $cl < Foswiki::Func::getContext()->{'LMPcontext'}->{'curdepth'} )
     {
         for my $c ( ($cl+1) .. $MAXDEPTH ) {
-            TWiki::Func::getContext()->{'LMPcontext'}->{'sec'.$c.'cnt'} = 0;
+            Foswiki::Func::getContext()->{'LMPcontext'}->{'sec'.$c.'cnt'} = 0;
           }
     }
-    TWiki::Func::getContext()->{'LMPcontext'}->{'curdepth'} = $cl;
+    Foswiki::Func::getContext()->{'LMPcontext'}->{'curdepth'} = $cl;
 
-    TWiki::Func::getContext()->{'LMPcontext'}->{'secrefs'}->{$label} = $sn;
+    Foswiki::Func::getContext()->{'LMPcontext'}->{'secrefs'}->{$label} = $sn;
 
     $ret = "\n<!-- ";
     $ret .= '<nop>Sub' x ($cl-1);
@@ -86,9 +90,9 @@ sub handleReferences
     my $ref = $_[0];	
     my ($backref,$txt) = ("",""); 
 
-    my %LMPc = %{ TWiki::Func::getContext()->{'LMPcontext'} };
+    my %LMPc = %{ Foswiki::Func::getContext()->{'LMPcontext'} };
 
-    if (exists(TWiki::Func::getContext()->{'genpdflatex'})) {
+    if (exists(Foswiki::Func::getContext()->{'genpdflatex'})) {
         $txt = '<latex>\ref{'.$ref.'}</latex>';
 
     } else {
@@ -134,7 +138,7 @@ sub handleFloat
     my $input = $_[0];	
     my $prefs = $_[1];
 
-    my %c = %{ &TWiki::Func::getContext() }; 
+    my %c = %{ &Foswiki::Func::getContext() }; 
     my %LMPc = %{ $c{'LMPcontext'} };
 
     my @a=('0'..'9','a'..'z','A'..'Z');
@@ -143,7 +147,7 @@ sub handleFloat
                  'span'  => 'onecol',
                  'caption' => ' ' );
 
-    # fix inputs to catch nested TWiki markup
+    # fix inputs to catch nested Foswiki markup
     my $cnt = 0; 
     my $tmp = '{'.$prefs.'}%'.$input;
     # print STDERR "CrossRef: handleFloat: ".$tmp."\n";
@@ -156,7 +160,7 @@ sub handleFloat
     # print STDERR "CrossRef: handleFloat: ".pos($tmp)."\t".$prefs."\n\t".$input."\n";
 
 
-    my %opts2 = TWiki::Func::extractParameters( $prefs );
+    my %opts2 = Foswiki::Func::extractParameters( $prefs );
     map { $opts{$_} = $opts2{$_} } keys %opts2;
     # while ( $prefs=~ m/(.*?)=\"(.*?)\"/g ) {
     #     my ($a,$b) = ($1,$2);
@@ -176,7 +180,7 @@ sub handleFloat
         
     # print STDERR map {" $_ => $opts{$_}\n" } keys %opts;
     my $txt2 = "";
-    if( exists(TWiki::Func::getContext()->{'genpdflatex'}) ) {           ## for genpdflatex
+    if( exists(Foswiki::Func::getContext()->{'genpdflatex'}) ) {           ## for genpdflatex
         # in Cairo (at least) latex new-lines, '\\', get translated to 
         # spaces, '\', but if they appear at the end of the line. 
         # So pad in a few spaces to protect them...
@@ -225,7 +229,7 @@ sub handleFloat
         $LMPc{'tblrefs'} = \%tblrefs;
         $LMPc{'figrefs'} = \%figrefs;
 
-        TWiki::Func::getContext()->{'LMPcontext'} = \%LMPc;
+        Foswiki::Func::getContext()->{'LMPcontext'} = \%LMPc;
         
     } # end. if !($latexout)
 

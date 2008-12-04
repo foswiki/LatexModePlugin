@@ -1,8 +1,10 @@
 # LatexModePlugin.pm
+# Copyright (C) 2008 W Scott Hoge, shoge at bwh dot harvard dot edu
+#
+# ported from TWiki to Foswiki, Nov 2008
+#
 # Copyright (C) 2005-2006 W Scott Hoge, shoge at bwh dot harvard dot edu
 # Copyright (C) 2002 Graeme Lufkin, gwl@u.washington.edu
-#
-# TWiki WikiClone ($wikiversion has version info)
 #
 # Copyright (C) 2000-2001 Andrea Sterbini, a.sterbini@flashnet.it
 # Copyright (C) 2001 Peter Thoeny, Peter@Thoeny.com
@@ -20,27 +22,11 @@
 #
 # =========================
 #
-# This is the Math Mode TWiki plugin.  See TWiki.LatexModePlugin for details.
+# This is a Latex Mode Foswiki Plugin.  See Foswiki.LatexModePlugin for details.
 #
-# Each plugin is a package that contains the subs:
-#
-#   initPlugin           ( $topic, $web, $user, $installWeb )
-#   commonTagsHandler    ( $text, $topic, $web )
-#   outsidePREHandler    ( $text )
-#   insidePREHandler     ( $text )
-#   postRenderingHandler  ( $text )
-#
-# initPlugin is required, all other are optional. 
-# For increased performance, all handlers except initPlugin are
-# disabled. To enable a handler remove the leading DISABLE_ from
-# the function name.
-# 
-# NOTE: To interact with TWiki use the official TWiki functions
-# in the &TWiki::Func module. Do not reference any functions or
-# variables elsewhere in TWiki!!
 
 # LatexModePlugin: This plugin allows you to include mathematics and
-# other Latex markup commands in TWiki pages.  To declare a portion of
+# other Latex markup commands in Foswiki pages.  To declare a portion of
 # the text as latex, enclose it within any of the available markup tags:
 #    %$ ... $%    for in-line equations
 #    %\[ ... \]%  or
@@ -57,7 +43,7 @@
 # in the page will be deleted.
 
 # =========================
-package TWiki::Plugins::LatexModePlugin;
+package Foswiki::Plugins::LatexModePlugin;
 
 use strict;
 
@@ -71,11 +57,9 @@ use vars qw( $VERSION $RELEASE $debug
 #             $eqn $fig $tbl $use_color @norender $tweakinline $rerender
 
 
-use vars qw( %TWikiCompatibility );
-
 # number the release version of this plugin
 $VERSION = '$Rev$';
-$RELEASE = '3.71';
+$RELEASE = '3.8';
 
 # =========================
 sub initPlugin
@@ -83,29 +67,29 @@ sub initPlugin
     my ( $topic, $web, $user, $installWeb ) = @_;
 
     # check for Plugins.pm versions
-    if( $TWiki::Plugins::VERSION < 1.025 ) { 
+    if( $Foswiki::Plugins::VERSION < 1.025 ) { 
         # this version is Dakar and Cairo compatible
-        &TWiki::Func::writeWarning( "Version mismatch between LatexModePlugin (Dakar edition) and Plugins.pm" );
+        &Foswiki::Func::writeWarning( "Version mismatch between LatexModePlugin (Dakar edition) and Plugins.pm" );
         return 0;
     }
 
     #get the relative URL to the attachment directory for this page
-    # $pubUrlPath = # &TWiki::Func::getUrlHost() . 
-    #     &TWiki::Func::getPubUrlPath() . "/$web/$topic";
+    # $pubUrlPath = # &Foswiki::Func::getUrlHost() . 
+    #     &Foswiki::Func::getPubUrlPath() . "/$web/$topic";
     
     # Get preferences values
-    $debug = &TWiki::Func::getPreferencesFlag( "LATEXMODEPLUGIN_DEBUG" );
+    $debug = &Foswiki::Func::getPreferencesFlag( "LATEXMODEPLUGIN_DEBUG" );
 
     $initialized = 0;
 
-    if( $TWiki::Plugins::VERSION >= 1.1 ) {
+    if( $Foswiki::Plugins::VERSION >= 1.1 ) {
         # Dakar provides a sandbox
-        $sandbox = $TWiki::sharedSandbox || 
-            $TWiki::sandbox;    # for TWiki 4.2
+        $sandbox = $Foswiki::sharedSandbox || 
+            $Foswiki::sandbox;    # for Foswiki 4.2
     } else {
         # in Cairo, must use the contrib package
-        eval("use TWiki::Contrib::DakarContrib;");
-        $sandbox = new TWiki::Sandbox();
+        eval("use Foswiki::Contrib::DakarContrib;");
+        $sandbox = new Foswiki::Sandbox();
     }
 
     return 1;
@@ -124,29 +108,29 @@ sub commonTagsHandler
              ($_[0]=~m/%SECLABEL.*?%/)  ||
              ($_[0]=~m/%BEGINLATEX.*?%/)  ||
              ($_[0]=~m/%BEGIN(FIGURE|TABLE){.*?}%/) ||
-             ($_[0] =~ m/%(\$.*?\$)%/) ||
-             ($_[0] =~ m/%(\\\[.*?\\\])%/) 
+             ( ($_[0] =~ m/%\$/) and ($_[0] =~ m/\$%/) ) || 
+             ( ($_[0] =~ m/%\\\[/) and ($_[0] =~ m/\\\]%/) )
              ) 
-        {   use TWiki::Plugins::LatexModePlugin::Init;
-            use TWiki::Plugins::LatexModePlugin::Render;
-            use TWiki::Plugins::LatexModePlugin::CrossRef;
-            eval(" use TWiki::Plugins::LatexModePlugin::Parse;");
-            $initialized = &TWiki::Plugins::LatexModePlugin::Init::doInit(); 
+        {   require Foswiki::Plugins::LatexModePlugin::Init;
+            require Foswiki::Plugins::LatexModePlugin::Render;
+            require Foswiki::Plugins::LatexModePlugin::CrossRef;
+            eval(" require Foswiki::Plugins::LatexModePlugin::Parse;");
+            $initialized = &Foswiki::Plugins::LatexModePlugin::Init::doInit(); 
         }
         else 
         { return; }
     }
 
-    TWiki::Func::getContext()->{'LMPcontext'}->{'topic'} = $_[1];
-    TWiki::Func::getContext()->{'LMPcontext'}->{'web'} = $_[2];
+    Foswiki::Func::getContext()->{'LMPcontext'}->{'topic'} = $_[1];
+    Foswiki::Func::getContext()->{'LMPcontext'}->{'web'} = $_[2];
 
-    TWiki::Func::writeDebug( " TWiki::Plugins::LatexModePlugin::commonTagsHandler( $_[2].$_[1] )" ) if $debug;
+    Foswiki::Func::writeDebug( " Foswiki::Plugins::LatexModePlugin::commonTagsHandler( $_[2].$_[1] )" ) if $debug;
 
     # This is the place to define customized tags and variables
     # Called by sub handleCommonTags, after %INCLUDE:"..."%
 
     $_[0] =~ s!%BEGINALLTEX({.*?})?%(.*?)%ENDALLTEX%!&handleAlltex($2,$1)!gseo;
-    return if ( TWiki::Func::getContext()->{'LMPcontext'}->{'alltexmode'} );
+    return if ( Foswiki::Func::getContext()->{'LMPcontext'}->{'alltexmode'} );
 
     ### pass through text to assign labels to section numbers
     ###
@@ -176,7 +160,7 @@ sub handleAlltex
 {
     return unless ($initialized);
 
-    &TWiki::Plugins::LatexModePlugin::Parse::handleAlltex(@_);
+    &Foswiki::Plugins::LatexModePlugin::Parse::handleAlltex(@_);
 }
 
 # =========================
@@ -184,7 +168,7 @@ sub handleFloat
 {
     return unless ($initialized);
 
-    &TWiki::Plugins::LatexModePlugin::CrossRef::handleFloat(@_);
+    &Foswiki::Plugins::LatexModePlugin::CrossRef::handleFloat(@_);
 }
 
 # =========================
@@ -192,7 +176,7 @@ sub handleSections
 {
     return unless ($initialized);
 
-    &TWiki::Plugins::LatexModePlugin::CrossRef::handleSections(@_);
+    &Foswiki::Plugins::LatexModePlugin::CrossRef::handleSections(@_);
 }
 
 # =========================
@@ -200,7 +184,7 @@ sub handleReferences
 {
     return unless ($initialized);
 
-    &TWiki::Plugins::LatexModePlugin::CrossRef::handleReferences(@_);
+    &Foswiki::Plugins::LatexModePlugin::CrossRef::handleReferences(@_);
 }
 
 # =========================
@@ -208,7 +192,7 @@ sub handleLatex
 {
     return unless ($initialized);
 
-    &TWiki::Plugins::LatexModePlugin::Render::handleLatex(@_);
+    &Foswiki::Plugins::LatexModePlugin::Render::handleLatex(@_);
 }
 
 # =========================
@@ -216,23 +200,11 @@ sub handlePreamble
 {
     my $text = $_[0];	
 
-    TWiki::Func::getContext()->{'LMPcontext'}->{'preamble'} .= $text;
+    Foswiki::Func::getContext()->{'LMPcontext'}->{'preamble'} .= $text;
 
     return('');
 }
 
-
-
-## disable the call to endRenderingHandler in Dakar (i.e. TWiki::Plugins::VERSION >= 1.1)
-$TWikiCompatibility{endRenderingHandler} = 1.1;
-# =========================
-sub endRenderingHandler
-{
-    # for backwards compatibility with Cairo
-    postRenderingHandler($_[0]);
-
-}
-	
 # =========================
 sub afterCommonTagsHandler # postRenderingHandler
 {
@@ -241,7 +213,7 @@ sub afterCommonTagsHandler # postRenderingHandler
 
     return unless ($initialized);
 
-    &TWiki::Plugins::LatexModePlugin::Render::renderEquations(@_);
+    &Foswiki::Plugins::LatexModePlugin::Render::renderEquations(@_);
 }
 
 

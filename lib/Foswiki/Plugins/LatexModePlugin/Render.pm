@@ -1,4 +1,8 @@
 # LatexModePlugin::Render.pm
+# Copyright (C) 2008 W Scott Hoge, shoge at bwh dot harvard dot edu
+#
+# ported from TWiki to Foswiki, Nov 2008
+#
 # Copyright (C) 2005-2006 W Scott Hoge, shoge at bwh dot harvard dot edu
 # Copyright (C) 2002 Graeme Lufkin, gwl@u.washington.edu
 #
@@ -20,13 +24,13 @@
 #
 # =========================
 
-package TWiki::Plugins::LatexModePlugin::Render;
+package Foswiki::Plugins::LatexModePlugin::Render;
 
 use strict;
 
 use vars qw( $EXT );
 
-my $debug = $TWiki::Plugins::LatexModePlugin::debug;
+my $debug = $Foswiki::Plugins::LatexModePlugin::debug;
 
 use Digest::MD5 qw( md5_hex );
 
@@ -43,43 +47,43 @@ use Image::Info qw( image_info );
 
 my $pathSep = ($^O =~ m/^Win/i) ? "\\" : '/' ;
 
-my $PATHTOLATEX = $TWiki::cfg{Plugins}{LatexModePlugin}{latex} ||
+my $PATHTOLATEX = $Foswiki::cfg{Plugins}{LatexModePlugin}{latex} ||
     '/usr/share/texmf/bin/latex';
-my $PATHTOPDFLATEX = $TWiki::cfg{Plugins}{LatexModePlugin}{pdflatex} ||
+my $PATHTOPDFLATEX = $Foswiki::cfg{Plugins}{LatexModePlugin}{pdflatex} ||
     '/usr/share/texmf/bin/pdflatex';
-my $PATHTODVIPS = $TWiki::cfg{Plugins}{LatexModePlugin}{dvips} ||
+my $PATHTODVIPS = $Foswiki::cfg{Plugins}{LatexModePlugin}{dvips} ||
     '/usr/share/texmf/bin/dvips';
-my $PATHTOCONVERT = $TWiki::cfg{Plugins}{LatexModePlugin}{convert} ||
+my $PATHTOCONVERT = $Foswiki::cfg{Plugins}{LatexModePlugin}{convert} ||
     '/usr/X11R6/bin/convert';
-my $PATHTODVIPNG = $TWiki::cfg{Plugins}{LatexModePlugin}{dvipng} ||
+my $PATHTODVIPNG = $Foswiki::cfg{Plugins}{LatexModePlugin}{dvipng} ||
     '/usr/share/texmf/bin/dvipng';
-my $PATHTOMIMETEX = $TWiki::cfg{Plugins}{LatexModePlugin}{mimetex} ||
+my $PATHTOMIMETEX = $Foswiki::cfg{Plugins}{LatexModePlugin}{mimetex} ||
     '/usr/local/bin/mimetex';
 
-my $DEFAULTENGINE = $TWiki::cfg{Plugins}{LatexModePlugin}{engine} ||
+my $DEFAULTENGINE = $Foswiki::cfg{Plugins}{LatexModePlugin}{engine} ||
     'dvipng';  # options: 'dvipng', 'ps', 'pdf', 'mimetex'
 
-my $DISABLE = $TWiki::cfg{Plugins}{LatexModePlugin}{donotrenderlist} ||
+my $DISABLE = $Foswiki::cfg{Plugins}{LatexModePlugin}{donotrenderlist} ||
     'input,include,catcode';
 my @norender = split(',',$DISABLE);
 
-my $tweakinline = $TWiki::cfg{Plugins}{LatexModePlugin}{tweakinline} || 
+my $tweakinline = $Foswiki::cfg{Plugins}{LatexModePlugin}{tweakinline} || 
     0;
 
-my $GREP =  $TWiki::cfg{Plugins}{LatexModePlugin}{fgrep} ||
-    $TWiki::fgrepCmd ||
+my $GREP =  $Foswiki::cfg{Plugins}{LatexModePlugin}{fgrep} ||
+    $Foswiki::fgrepCmd ||
     '/usr/bin/fgrep';
 
 # This is the extension/type of the generated images. Valid types
 # are png, and gif.
-$EXT = $TWiki::cfg{Plugins}{LatexModePlugin}{imagetype} || 'png';
+$EXT = $Foswiki::cfg{Plugins}{LatexModePlugin}{imagetype} || 'png';
 
 ### The variables below this line will likely not need to be changed
 ######################################################################
 
 #this is the name of the latex file created by the program.  You shouldn't
 #need to change it unless for some bizarre reason you have a file attached to
-#a TWiki topic called twiki_math or twiki_math.tex
+#a Foswiki topic called twiki_math or twiki_math.tex
 my $LATEXBASENAME = 'twiki_math';
 my $LATEXFILENAME = $LATEXBASENAME . '.tex';
 
@@ -105,13 +109,13 @@ my $convertargs = " -density %DENSITY|N%".
 ## # to be used during rendering (e.g. in-line vs. own-line equations)
 my %markup_opts = ();
 
-my $sandbox =  $TWiki::sharedSandbox || $TWiki::sandbox;
-# $TWiki::Plugins::LatexModePlugin::sandbox;
+my $sandbox =  $Foswiki::sharedSandbox || $Foswiki::sandbox;
+# $Foswiki::Plugins::LatexModePlugin::sandbox;
 
 # sub _writeOpts {
 # ## 
 #     my ($web,$topic,$s1,$s2) = @_;
-#     my $fn = &TWiki::Func::getPubDir() . "/".$web.'/'.$topic.'/mapping.txt';
+#     my $fn = &Foswiki::Func::getPubDir() . "/".$web.'/'.$topic.'/mapping.txt';
 #     open(F, ">>$fn") or return;
 #     use POSIX qw/strftime/;
 #     print F strftime, "%a %b %d %X %Z %Y\n", localtime;
@@ -135,7 +139,7 @@ sub handleLatex
     my $escaped = $_[0];
     my $prefs = $_[1];
 
-    my %LMPc = %{ TWiki::Func::getContext()->{'LMPcontext'} };
+    my %LMPc = %{ Foswiki::Func::getContext()->{'LMPcontext'} };
 
     my %eqnrefs = defined(%{ $LMPc{'eqnrefs'} }) ? %{$LMPc{'eqnrefs'}} : ();
 
@@ -157,7 +161,7 @@ sub handleLatex
                  'topic' => $LMPc{'topic'}
                  );
 
-    my %opts2 = TWiki::Func::extractParameters( $prefs );
+    my %opts2 = Foswiki::Func::extractParameters( $prefs );
     # map { $opts{$_} = $opts2{$_} } keys %opts2;
     if( exists($opts2{'attachment'}) ){
         $opts{'gamma'} = 1.0;   # use a different default gamma for images
@@ -210,7 +214,7 @@ sub handleLatex
 COLORS
     }
 
-    &TWiki::Func::writeDebug( "- LatexModePlugin::handleLatex( ".
+    &Foswiki::Func::writeDebug( "- LatexModePlugin::handleLatex( ".
                               $math_string . " :: ". 
                               join('; ',map{"$_ => $opts{$_}"}keys(%opts)). 
                               " )" ) if $debug;
@@ -223,7 +227,7 @@ COLORS
             unless ($opts{'label'} =~ m/^eqn?:/ );
     }
 
-    if ( exists(TWiki::Func::getContext()->{'genpdflatex'}) ) {
+    if ( exists(Foswiki::Func::getContext()->{'genpdflatex'}) ) {
 
         if( exists($opts{'label'}) ) {
             # strip off any 'displaymath' calls
@@ -312,12 +316,12 @@ COLORS
         # and NOP the WikiWords:
         $escaped =~ s!(\u\w\l\w+\u\w)!<nop>$1!g;
 
-        my $image_name =  join('/', ( &TWiki::Func::getPubUrlPath(),
+        my $image_name =  join('/', ( &Foswiki::Func::getPubUrlPath(),
                                       $LMPc{'web'}, $LMPc{'topic'},
                                       "latex$hash_code.$EXT" ) );
         
         # if image currently exists, get its dimensions
-        my $outimg = &TWiki::Func::getPubDir() . "/".$LMPc{'web'}.'/'.$LMPc{'topic'}."/"."latex$hash_code.$EXT";
+        my $outimg = &Foswiki::Func::getPubDir() . "/".$LMPc{'web'}.'/'.$LMPc{'topic'}."/"."latex$hash_code.$EXT";
         my $str = "";
         if ( !($LMPc{'rerender'}) and (-f $outimg) ) {
             my $img = image_info($outimg);
@@ -366,7 +370,7 @@ COLORS
             $txt = "<div align=\"center\"><img src=\"$image_name\" $str alt=\"$escaped\" /></div>";
         }
         $LMPc{'eqnrefs'} = \%eqnrefs;
-        TWiki::Func::getContext()->{'LMPcontext'} = \%LMPc;
+        Foswiki::Func::getContext()->{'LMPcontext'} = \%LMPc;
 
     }  # end 'if !$latexout';
 
@@ -377,7 +381,7 @@ sub createTempLatexFiles {
 
     my %hashed_math_strings = %{ $_[0] };
 
-    my %LMPc = %{ &TWiki::Func::getContext()->{'LMPcontext'} };
+    my %LMPc = %{ &Foswiki::Func::getContext()->{'LMPcontext'} };
     # print STDERR '-'x70; print STDERR "\n";
 
     my $pdf_image_number = 0;   # initialize the image count
@@ -403,8 +407,8 @@ sub createTempLatexFiles {
     }
 
     my $txt = '';
-    if ( TWiki::Func::getContext()->{'LMPcontext'}->{'docclass'} ) {
-        $txt .= TWiki::Func::getContext()->{'LMPcontext'}->{'docclass'}."\n";
+    if ( Foswiki::Func::getContext()->{'LMPcontext'}->{'docclass'} ) {
+        $txt .= Foswiki::Func::getContext()->{'LMPcontext'}->{'docclass'}."\n";
     } else {
         $txt .= "\\documentclass{article}\n";
     }
@@ -430,24 +434,24 @@ sub createTempLatexFiles {
 
             my ($ext,$af) = ('','');
             my @extlist = ('','.eps','.eps.gz','.pdf','.png','.jpg');
-            if ( ( $TWiki::Plugins::VERSION < 1.1 ) or
-                 ( $TWiki::cfg{Plugins}{LatexModePlugin}{bypassattach}) ) { 
+            if ( ( $Foswiki::Plugins::VERSION < 1.1 ) or
+                 ( $Foswiki::cfg{Plugins}{LatexModePlugin}{bypassattach}) ) { 
                 # Cairo interface
                 
-                $af = join( $pathSep, &TWiki::Func::getPubDir(),
+                $af = join( $pathSep, &Foswiki::Func::getPubDir(),
                             $LMPc{'web'}, $LMPc{'topic'},
                             $opts{'attachment'} );
                 
-                $af = TWiki::Sandbox::normalizeFileName( $af );
+                $af = Foswiki::Sandbox::normalizeFileName( $af );
 
                 foreach my $e (@extlist) {
                     $ext = $e;
                     if (-f $af.$ext) {
-                        &TWiki::Func::writeDebug( "LatexModePlugin: copy ".$af.$ext ) 
+                        &Foswiki::Func::writeDebug( "LatexModePlugin: copy ".$af.$ext ) 
                             if ($debug);
                         # copy( $af.$ext, $LATEXWDIR ) || do {
                         copy( $af.$ext, "." ) || do {
-                            &TWiki::Func::writeDebug( "LatexModePlugin: copy failed ".$! );
+                            &Foswiki::Func::writeDebug( "LatexModePlugin: copy failed ".$! );
                             $value = "attachment \{".$markup_opts{$key}->{'attachment'}."\} \ not found";
                         };
                         $markup_opts{$key}->{'attachment'} .= $ext;
@@ -471,7 +475,7 @@ sub createTempLatexFiles {
                 my $af= $opts{'attachment'};
                 foreach my $e (@extlist) {
                     $ext = $e;
-                    if ( TWiki::Func::attachmentExists( $LMPc{'web'},
+                    if ( Foswiki::Func::attachmentExists( $LMPc{'web'},
                                                         $LMPc{'topic'},
                                                         $af.$ext ) ) {
                         
@@ -487,7 +491,7 @@ sub createTempLatexFiles {
                         }
 
                         open(F,">".'.'.$pathSep.$af.$ext);
-                        print F TWiki::Func::readAttachment( $LMPc{'web'},
+                        print F Foswiki::Func::readAttachment( $LMPc{'web'},
                                                              $LMPc{'topic'},
                                                              $af.$ext );
                         close(F);
@@ -501,7 +505,7 @@ sub createTempLatexFiles {
                  !(-f $markup_opts{$key}->{'attachment'}) );
 
 
-        &TWiki::Func::writeDebug( "LatexModePlugin: ".
+        &Foswiki::Func::writeDebug( "LatexModePlugin: ".
                                   $value . " :: " .
                                   join('; ', sort map{"$_=>$opts{$_}"} keys(%opts))
                                   ) if ($debug);
@@ -550,7 +554,7 @@ sub createTempLatexFiles {
 
 sub renderEquations {
 
-    my %LMPc = %{ &TWiki::Func::getContext()->{'LMPcontext'} };
+    my %LMPc = %{ &Foswiki::Func::getContext()->{'LMPcontext'} };
     # print STDERR '-'x70; print STDERR "\n";
     # print STDERR map {"$_ => $LMPc{$_}\n"} keys %LMPc;
     # print STDERR '+'x70; print STDERR "\n";
@@ -559,10 +563,10 @@ sub renderEquations {
 
     my $path;
 
-    &TWiki::Func::writeDebug( " TWiki::LatexModePlugin::renderEquations( ".$LMPc{'web'}.'.'.$LMPc{'topic'}." )" ) if $debug;
+    &Foswiki::Func::writeDebug( " Foswiki::LatexModePlugin::renderEquations( ".$LMPc{'web'}.'.'.$LMPc{'topic'}." )" ) if $debug;
 
-    #my @revinfo = &TWiki::Func::getRevisionInfo($web, $topic, "", 0);
-    #&TWiki::Func::writeDebug( "- LatexModePlugin: @revinfo" ) if $debug;
+    #my @revinfo = &Foswiki::Func::getRevisionInfo($web, $topic, "", 0);
+    #&Foswiki::Func::writeDebug( "- LatexModePlugin: @revinfo" ) if $debug;
 
     #check if there was any math in this document
     return unless defined( $LMPc{'hashed_math_strings'} );
@@ -570,7 +574,7 @@ sub renderEquations {
 
     ## 'halt-on-error' is not supported in older versions of tetex, so check to see if it exists:
     ## 
-    my ($resp,$exit);
+    my ($resp,$exit) = ('','');
     if (-x $PATHTOLATEX) {
         ($resp,$exit) = $sandbox->sysCommand("$PATHTOLATEX ".' --help');
     } elsif (-x $PATHTOPDFLATEX) {
@@ -586,22 +590,22 @@ sub renderEquations {
 
     my %hashed_math_strings = %{ $LMPc{'hashed_math_strings'} };
 
-    # &TWiki::Func::writeDebug( join(" ", keys(%hashed_math_strings) ) ) if ($debug);
+    # &Foswiki::Func::writeDebug( join(" ", keys(%hashed_math_strings) ) ) if ($debug);
 
     return unless length(keys(%hashed_math_strings)) > 0;
 
 
-    $_[0] .= "\n<hr>TWiki LatexModePlugin error messages:<br>\n".
+    $_[0] .= "\n<hr>Foswiki LatexModePlugin error messages:<br>\n".
         $LMPc{'error_catch_all'} if ( length($LMPc{'error_catch_all'}) > 0 );
 
 
     #if this is a view script, then we will try to delete old files
-    my $delete_files = ( &TWiki::Func::getContext()->{'view'} ) || 0;
+    my $delete_files = ( &Foswiki::Func::getContext()->{'view'} ) || 0;
 
     my %extfiles = ();
-    $path = &TWiki::Func::getPubDir() . "/".$LMPc{'web'}.'/'.$LMPc{'topic'};
-    if ( ( $TWiki::Plugins::VERSION < 1.1 )  or
-         ( $TWiki::cfg{Plugins}{LatexModePlugin}{bypassattach}) ) {
+    $path = &Foswiki::Func::getPubDir() . "/".$LMPc{'web'}.'/'.$LMPc{'topic'};
+    if ( ( $Foswiki::Plugins::VERSION < 1.1 )  or
+         ( $Foswiki::cfg{Plugins}{LatexModePlugin}{bypassattach}) ) {
         # Cairo interface
         opendir(D,$path);
         my @a = grep(/\.$EXT$/,readdir(D));
@@ -612,7 +616,7 @@ sub renderEquations {
         closedir(D);
     } else { 
         # Dakar interface
-        my ( $meta, undef ) = TWiki::Func::readTopic( $LMPc{'web'}, $LMPc{'topic'} );
+        my ( $meta, undef ) = Foswiki::Func::readTopic( $LMPc{'web'}, $LMPc{'topic'} );
 
         if ( defined( $meta->{FILEATTACHMENT} ) ) {
             foreach my $c ( @{ $meta->{FILEATTACHMENT} } ) {
@@ -623,13 +627,13 @@ sub renderEquations {
 
     }
 
-    &TWiki::Func::writeDebug( "LatexModePlugin::Render - Scanning file attachments" ) if $debug;
-    &TWiki::Func::writeDebug( " pre-hashes: ".join(' ',keys(%hashed_math_strings) ) ) if $debug;
+    &Foswiki::Func::writeDebug( "LatexModePlugin::Render - Scanning file attachments" ) if $debug;
+    &Foswiki::Func::writeDebug( " pre-hashes: ".join(' ',keys(%hashed_math_strings) ) ) if $debug;
 
     foreach my $a ( keys %extfiles ) {
-        my $fn = $extfiles{$a}->{name}; # ( $TWiki::Plugins::VERSION >= 1.1 ) ? $a->{name} : $a;
+        my $fn = $extfiles{$a}->{name}; # ( $Foswiki::Plugins::VERSION >= 1.1 ) ? $a->{name} : $a;
 
-        &TWiki::Func::writeDebug( "\n-- $fn --\n" ) if ($debug);
+        &Foswiki::Func::writeDebug( "\n-- $fn --\n" ) if ($debug);
 
         # print STDERR "$fn : ". ($extfiles{$a}->{date}) ."  ".time." \n";
         
@@ -653,20 +657,20 @@ sub renderEquations {
                 ) {
 
                 #delete the old image
-                &TWiki::Func::writeDebug( "Deleting old image that I think belongs to me: $fn ".(-f $path.$pathSep.$fn) ) if $debug;
+                &Foswiki::Func::writeDebug( "Deleting old image that I think belongs to me: $fn ".(-f $path.$pathSep.$fn) ) if $debug;
                 if ( $fn =~ /^([-\@\w.]+)$/ ) { # untaint filename
-                    $fn = TWiki::Sandbox::normalizeFileName($1);
+                    $fn = Foswiki::Sandbox::normalizeFileName($1);
                     
-                    if ( ( $TWiki::Plugins::VERSION < 1.1 ) or
-                         ( $TWiki::cfg{Plugins}{LatexModePlugin}{bypassattach}) ) { 
+                    if ( ( $Foswiki::Plugins::VERSION < 1.1 ) or
+                         ( $Foswiki::cfg{Plugins}{LatexModePlugin}{bypassattach}) ) { 
                         # Cairo interface
                         unlink( $path.$pathSep.$fn ) if (-f $path.$pathSep.$fn);
                     } else {
                         # Dakar interface
-                        TWiki::Func::moveAttachment( $LMPc{'web'},
+                        Foswiki::Func::moveAttachment( $LMPc{'web'},
                                                      $LMPc{'topic'}, 
                                                      $fn,
-                                                     $TWiki::cfg{TrashWebName},
+                                                     $Foswiki::cfg{TrashWebName},
                                                      'TrashAttachment', $fn )
                             if (-f $path.$pathSep.$fn); # should be replaced by attacmentexists? function
                       }
@@ -674,17 +678,17 @@ sub renderEquations {
             }
         }
     }
-    &TWiki::Func::writeDebug( " post-hashes: ".join(' ',keys(%hashed_math_strings) ) ) if $debug;
+    &Foswiki::Func::writeDebug( " post-hashes: ".join(' ',keys(%hashed_math_strings) ) ) if $debug;
 
-    # for INCLUDED pages, check to see if each image exists already on TWiki. 
+    # for INCLUDED pages, check to see if each image exists already on Foswiki. 
     # remove from list of strings to create if it does.
     foreach my $key (keys %hashed_math_strings) {
         my $w = $markup_opts{$key}->{'web'};
         my $t = $markup_opts{$key}->{'topic'};
 
-        my $path = &TWiki::Func::getPubDir() .$pathSep.$w.$pathSep.$t.$pathSep;
-        if ( ( $TWiki::Plugins::VERSION < 1.1 )  or
-             ( $TWiki::cfg{Plugins}{LatexModePlugin}{bypassattach}) ) {
+        my $path = &Foswiki::Func::getPubDir() .$pathSep.$w.$pathSep.$t.$pathSep;
+        if ( ( $Foswiki::Plugins::VERSION < 1.1 )  or
+             ( $Foswiki::cfg{Plugins}{LatexModePlugin}{bypassattach}) ) {
             # Cairo interface
             if ( (-f $path.'latex'.$key.'.'.$EXT ) and 
                  !($LMPc{'rerender'}) ) {
@@ -692,7 +696,7 @@ sub renderEquations {
             
         } else { 
             # Dakar interface
-            if ( TWiki::Func::attachmentExists($w,$t,'latex'.$key.'.'.$EXT) and 
+            if ( Foswiki::Func::attachmentExists($w,$t,'latex'.$key.'.'.$EXT) and 
                  !($LMPc{'rerender'}) ) {
                 delete( $hashed_math_strings{$key} ); }
 
@@ -701,14 +705,14 @@ sub renderEquations {
 
     #check if there are any new images to render
     if ( scalar( keys( %hashed_math_strings ) ) == 0 ) {
-        TWiki::Func::getContext()->{'LMPcontext'}->{'hashed_math_strings'} = ();
+        Foswiki::Func::getContext()->{'LMPcontext'}->{'hashed_math_strings'} = ();
         return;
     }
 
     # create a temporary working directory
     my $LATEXWDIR = File::Temp::tempdir();
 
-    &TWiki::Func::writeDebug( "LatexModePlugin working directory: $LATEXWDIR" ) if $debug;
+    &Foswiki::Func::writeDebug( "LatexModePlugin working directory: $LATEXWDIR" ) if $debug;
 
     ### create the temporary Latex Working Directory...
     #does the topic's attachment directory exist?
@@ -718,11 +722,11 @@ sub renderEquations {
 
         # FIXME: this section should never be called, but should
         # report an error in the event that it does
-        &TWiki::Func::writeDebug( "Directory already exists." ) if $debug;
+        &Foswiki::Func::writeDebug( "Directory already exists." ) if $debug;
     } else {
         #create the directory if it didn't exist
         return unless mkdir( $LATEXWDIR );
-        &TWiki::Func::writeDebug( " Directory $LATEXWDIR does not exist" ) if $debug;
+        &Foswiki::Func::writeDebug( " Directory $LATEXWDIR does not exist" ) if $debug;
     }
     # move into the temprorary working directory
     # use Cwd 'cwd';
@@ -756,8 +760,8 @@ sub renderEquations {
         my ($resp,$ret) = $sandbox->sysCommand( $GREP.' -A 2 Error %LOG|F%',
                                                 LOG => $LATEXWDIR.$pathSep.$log );
         ### report errors on 'preview' and 'save'
-        if ( ( TWiki::Func::getContext()->{'preview'} ) || 
-             ( TWiki::Func::getContext()->{'save'} ) ) {
+        if ( ( Foswiki::Func::getContext()->{'preview'} ) || 
+             ( Foswiki::Func::getContext()->{'save'} ) ) {
             
             $_[0] .= "\n<hr>Latex rendering error messages:<pre>$resp</pre>\n" 
                 if ( ( length($resp) > 0 ) or ( $ret > 0 ) );
@@ -772,8 +776,8 @@ sub renderEquations {
                              );
 
         ### report errors on 'preview' and 'save'
-        if ( ( TWiki::Func::getContext()->{'preview'} ) || 
-             ( TWiki::Func::getContext()->{'save'} ) ) {
+        if ( ( Foswiki::Func::getContext()->{'preview'} ) || 
+             ( Foswiki::Func::getContext()->{'save'} ) ) {
             (my $logf = $LATEXFILENAME) =~ s/\.tex$/\.log/;
             # $sandbox->{TRACE} = 1;
             
@@ -795,7 +799,7 @@ sub renderEquations {
         }
     }
     if (%mimetex_hash_code_mapping) {
-        &TWiki::Func::writeDebug( "mimetex: ".
+        &Foswiki::Func::writeDebug( "mimetex: ".
            join(' ',keys %mimetex_hash_code_mapping) ) if $debug;
 
         &makePNGs( \%mimetex_hash_code_mapping, 
@@ -842,7 +846,7 @@ sub renderEquations {
                 $fn = $1; # $fn now untainted
                 unlink( "$fn" );
             } else {
-                &TWiki::Func::writeDebug( "Bizzare error.  match of \$fn failed? $fn" ) if $debug;
+                &Foswiki::Func::writeDebug( "Bizzare error.  match of \$fn failed? $fn" ) if $debug;
             }
 	}
     }
@@ -851,7 +855,7 @@ sub renderEquations {
     $LMPc{'hashed_math_strings'} = ();
     # $LMPc{'markup_opts'} = ();
     %markup_opts = ();
-    &TWiki::Func::writeDebug( "Math strings reset, done." ) if $debug;
+    &Foswiki::Func::writeDebug( "Math strings reset, done." ) if $debug;
 
     # remove the log file
     unlink($LATEXLOG) unless ($debug);
@@ -861,7 +865,7 @@ sub renderEquations {
     $LATEXWDIR = undef;
     # move back to the previous directory.
     # chdir($saveddir) if ( $saveddir );
-    TWiki::Func::getContext()->{'LMPcontext'} = \%LMPc;
+    Foswiki::Func::getContext()->{'LMPcontext'} = \%LMPc;
 
 }
 
@@ -943,7 +947,7 @@ sub makePNGs {
                 close(OI);
             }
 
-            &TWiki::Func::writeDebug( $outimg ) if ($debug);
+            &Foswiki::Func::writeDebug( $outimg ) if ($debug);
 
         } else {
             # OTW, use dvips/convert ...
@@ -1002,11 +1006,11 @@ sub makePNGs {
             #                   ($opts{'scale'} * $img->{height}) );
             # $_[0] =~ s/($outimg\")/$1 $str/;
 
-            if ( ( $TWiki::Plugins::VERSION < 1.1 ) ||
-                 ( $TWiki::cfg{Plugins}{LatexModePlugin}{bypassattach}) )
+            if ( ( $Foswiki::Plugins::VERSION < 1.1 ) ||
+                 ( $Foswiki::cfg{Plugins}{LatexModePlugin}{bypassattach}) )
             {
                 # Cairo interface
-                my $path = &TWiki::Func::getPubDir() . 
+                my $path = &Foswiki::Func::getPubDir() . 
                     "/".$opts{'web'}.'/'.$opts{'topic'};
 
                 mkdir( $path.$pathSep )unless (-e $path.$pathSep);
@@ -1015,7 +1019,7 @@ sub makePNGs {
                     $_[0] .= "<br> LatexModePlugin error: Move of $outimg failedg: $!";
             } else {
                 # Dakar interface
-                TWiki::Func::saveAttachment( $opts{'web'},
+                Foswiki::Func::saveAttachment( $opts{'web'},
                                              $opts{'topic'},
                                              $outimg,
                                              { file => $outimg,
@@ -1052,7 +1056,7 @@ sub trimInlineImage_v2 {
                          IN => $in,
                          OUT => $out );
 
-    my ($pre, $xpm);
+    my ($pre, $xpm) = ('','');
     my ($canvaschar,$cpp) = (' ',1);
     my ($col, $flag, $cnt) = (0,0,0);
     my ($midu, $midl, $sum)  = (0,0,'');
@@ -1099,12 +1103,12 @@ sub trimInlineImage_v2 {
             $pre .= $_;
             if ($_ =~ m/\"(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\"/) {
                 $cpp = $4;
-                &TWiki::Func::writeDebug( "cpp:'".$cpp."'" ) if ($debug);
+                &Foswiki::Func::writeDebug( "cpp:'".$cpp."'" ) if ($debug);
             }
             if ($_ =~ m/None|gray100/) {
                 $canvaschar = substr($_,1,$cpp);
             }
-            # &TWiki::Func::writeDebug( "canvaschar:'".$canvaschar."'" ) if ($debug);
+            # &Foswiki::Func::writeDebug( "canvaschar:'".$canvaschar."'" ) if ($debug);
 
         }
         $flag = 1 if m!/\*\spixels\s\*/!; # switch between 'pre' and the image
@@ -1164,7 +1168,7 @@ sub trimInlineImage_v2 {
     close(F);
 
 
-    $sandbox->sysCommand("$PATHTOCONVERT mod_%OUT|F% -transparent %BGC|S% %IN|F%",
+    $sandbox->sysCommand("$PATHTOCONVERT mod_%OUT|F% -antialias -transparent %BGC|S% %IN|F%",
                          OUT => $out,
                          BGC => $bgcolor,
                          IN  => $in);
