@@ -42,6 +42,12 @@
 # require a re-render.  Images from old expressions no longer included
 # in the page will be deleted.
 
+### for custom styles, LaTeX needs to know where to find them.  The
+### easiest way is to use a texmf tree below 'HOME'
+$ENV{'HOME'} = $Foswiki::cfg{Plugins}{LatexModePlugin}{home} ||
+    '/home/nobody';
+
+
 # =========================
 package Foswiki::Plugins::LatexModePlugin;
 
@@ -58,8 +64,9 @@ use vars qw( $VERSION $RELEASE $debug
 
 
 # number the release version of this plugin
-$VERSION = '$Rev$';
-$RELEASE = '3.8';
+our $VERSION = '$Rev$';
+our $RELEASE = '3.8';
+# our $SHORTDESCRIPTION = 'Enables <nop>LaTeX markup (mathematics and more) in Foswiki topics';
 
 # =========================
 sub initPlugin
@@ -68,8 +75,8 @@ sub initPlugin
 
     # check for Plugins.pm versions
     if( $Foswiki::Plugins::VERSION < 1.025 ) { 
-        # this version is Dakar and Cairo compatible
-        &Foswiki::Func::writeWarning( "Version mismatch between LatexModePlugin (Dakar edition) and Plugins.pm" );
+        # this version is Foswiki compatible
+        &Foswiki::Func::writeWarning( "Version mismatch between LatexModePlugin and Plugins.pm" );
         return 0;
     }
 
@@ -83,14 +90,13 @@ sub initPlugin
     $initialized = 0;
 
     if( $Foswiki::Plugins::VERSION >= 1.1 ) {
-        # Dakar provides a sandbox
         $sandbox = $Foswiki::sharedSandbox || 
-            $Foswiki::sandbox;    # for Foswiki 4.2
+            $Foswiki::sandbox;    # for Foswiki 1.0.0
     } else {
-        # in Cairo, must use the contrib package
-        eval("use Foswiki::Contrib::DakarContrib;");
-        $sandbox = new Foswiki::Sandbox();
+        $sandbox = undef;
     }
+
+    # Foswiki::Func::registerTagHandler( 'REFLATEX', \&handleReferences );
 
     return 1;
 }

@@ -181,9 +181,9 @@ sub handleFloat
     # print STDERR map {" $_ => $opts{$_}\n" } keys %opts;
     my $txt2 = "";
     if( exists(Foswiki::Func::getContext()->{'genpdflatex'}) ) {           ## for genpdflatex
-        # in Cairo (at least) latex new-lines, '\\', get translated to 
-        # spaces, '\', but if they appear at the end of the line. 
-        # So pad in a few spaces to protect them...
+        # latex new-lines, '\\', get translated to spaces, '\', but if
+        # they appear at the end of the line.  So pad in a few spaces
+        # to protect them...
         $input =~ s!\n!  \n!g;
 
         $txt2 = '<latex>';

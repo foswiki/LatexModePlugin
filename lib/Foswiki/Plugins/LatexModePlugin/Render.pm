@@ -41,6 +41,7 @@ use File::Temp;
 # use Image::Info to identify image size.
 use Image::Info qw( image_info );
 
+use Foswiki::Sandbox;
 
 ######################################################################
 ### installation specific variables:
@@ -109,7 +110,7 @@ my $convertargs = " -density %DENSITY|N%".
 ## # to be used during rendering (e.g. in-line vs. own-line equations)
 my %markup_opts = ();
 
-my $sandbox =  $Foswiki::sharedSandbox || $Foswiki::sandbox;
+# my $sandbox =  $Foswiki::sharedSandbox || $Foswiki::Sandbox;
 # $Foswiki::Plugins::LatexModePlugin::sandbox;
 
 # sub _writeOpts {
@@ -260,9 +261,8 @@ COLORS
         $math_string =~ s!%.*?\n!!gs;
         $math_string =~ s!LMPpcntLMP!%!g;
 
-        # in Cairo (at least) latex new-lines, '\\', get translated to 
-        # spaces, '\', if they appear at the end of the line.
-        # So protect them here...
+        # latex new-lines, '\\', get translated to spaces, '\', if
+        # they appear at the end of the line.  So protect them here...
         $math_string =~ s!\n!  \n!g;
         $txt = '<latex>'.$math_string.'</latex>';
 
@@ -436,7 +436,7 @@ sub createTempLatexFiles {
             my @extlist = ('','.eps','.eps.gz','.pdf','.png','.jpg');
             if ( ( $Foswiki::Plugins::VERSION < 1.1 ) or
                  ( $Foswiki::cfg{Plugins}{LatexModePlugin}{bypassattach}) ) { 
-                # Cairo interface
+                # filesystem interface
                 
                 $af = join( $pathSep, &Foswiki::Func::getPubDir(),
                             $LMPc{'web'}, $LMPc{'topic'},
@@ -470,7 +470,7 @@ sub createTempLatexFiles {
                     }
                 }                
             } else {
-                # Dakar interface
+                # database interface
                 my $ext;
                 my $af= $opts{'attachment'};
                 foreach my $e (@extlist) {
@@ -576,9 +576,9 @@ sub renderEquations {
     ## 
     my ($resp,$exit) = ('','');
     if (-x $PATHTOLATEX) {
-        ($resp,$exit) = $sandbox->sysCommand("$PATHTOLATEX ".' --help');
+        ($resp,$exit) = Foswiki::Sandbox->sysCommand("$PATHTOLATEX ".' --help');
     } elsif (-x $PATHTOPDFLATEX) {
-        ($resp,$exit) = $sandbox->sysCommand("$PATHTOPDFLATEX ".' --help');
+        ($resp,$exit) = Foswiki::Sandbox->sysCommand("$PATHTOPDFLATEX ".' --help');
     }
     if ($resp =~ m/halt\-on\-error/) {
         $LMPc{'haltonerror'} = ' -halt-on-error ';
@@ -606,7 +606,7 @@ sub renderEquations {
     $path = &Foswiki::Func::getPubDir() . "/".$LMPc{'web'}.'/'.$LMPc{'topic'};
     if ( ( $Foswiki::Plugins::VERSION < 1.1 )  or
          ( $Foswiki::cfg{Plugins}{LatexModePlugin}{bypassattach}) ) {
-        # Cairo interface
+        # filesystem interface
         opendir(D,$path);
         my @a = grep(/\.$EXT$/,readdir(D));
         for my $c (0 .. $#a) {
@@ -615,7 +615,7 @@ sub renderEquations {
         }
         closedir(D);
     } else { 
-        # Dakar interface
+        # database interface
         my ( $meta, undef ) = Foswiki::Func::readTopic( $LMPc{'web'}, $LMPc{'topic'} );
 
         if ( defined( $meta->{FILEATTACHMENT} ) ) {
@@ -663,10 +663,10 @@ sub renderEquations {
                     
                     if ( ( $Foswiki::Plugins::VERSION < 1.1 ) or
                          ( $Foswiki::cfg{Plugins}{LatexModePlugin}{bypassattach}) ) { 
-                        # Cairo interface
+                        # filesystem interface
                         unlink( $path.$pathSep.$fn ) if (-f $path.$pathSep.$fn);
                     } else {
-                        # Dakar interface
+                        # database interface
                         Foswiki::Func::moveAttachment( $LMPc{'web'},
                                                      $LMPc{'topic'}, 
                                                      $fn,
@@ -689,13 +689,13 @@ sub renderEquations {
         my $path = &Foswiki::Func::getPubDir() .$pathSep.$w.$pathSep.$t.$pathSep;
         if ( ( $Foswiki::Plugins::VERSION < 1.1 )  or
              ( $Foswiki::cfg{Plugins}{LatexModePlugin}{bypassattach}) ) {
-            # Cairo interface
+            # filesystem interface
             if ( (-f $path.'latex'.$key.'.'.$EXT ) and 
                  !($LMPc{'rerender'}) ) {
                 delete( $hashed_math_strings{$key} ); }
             
         } else { 
-            # Dakar interface
+            # database interface
             if ( Foswiki::Func::attachmentExists($w,$t,'latex'.$key.'.'.$EXT) and 
                  !($LMPc{'rerender'}) ) {
                 delete( $hashed_math_strings{$key} ); }
@@ -740,6 +740,7 @@ sub renderEquations {
     # system("echo \"$LATEXWDIR\n^O\n\" > $LATEXLOG");
     open(LF,">$LATEXLOG");
     print LF "$LATEXWDIR\n\n";
+    print LF "\n";
     close(LF);
 
     my ($dvim, $pdfm, $mimem) = createTempLatexFiles( \%hashed_math_strings );
@@ -750,14 +751,14 @@ sub renderEquations {
     # generate the output images by running latex-dvips-convert on the file
     # system("$PATHTOLATEX -interaction=nonstopmode -halt-on-error $LATEXFILENAME >> $LATEXLOG 2>&1");
     if ( scalar(%pdf_hash_code_mapping) ) {
-        $sandbox->sysCommand("$PATHTOPDFLATEX ".
+        Foswiki::Sandbox->sysCommand("$PATHTOPDFLATEX ".
                              ' -interaction=nonstopmode '.
                              $LMPc{'haltonerror'}.
                              ' %FILE|F% ',
                              FILE => 'pdf_'.$LATEXFILENAME
                              );
         (my $log = 'pdf_'.$LATEXFILENAME) =~ s/\.tex$/\.log/;
-        my ($resp,$ret) = $sandbox->sysCommand( $GREP.' -A 2 Error %LOG|F%',
+        my ($resp,$ret) = Foswiki::Sandbox->sysCommand( $GREP.' -A 2 Error %LOG|F%',
                                                 LOG => $LATEXWDIR.$pathSep.$log );
         ### report errors on 'preview' and 'save'
         if ( ( Foswiki::Func::getContext()->{'preview'} ) || 
@@ -768,7 +769,7 @@ sub renderEquations {
         }
     }
     if ( scalar(%dvi_hash_code_mapping) ) {
-        $sandbox->sysCommand("$PATHTOLATEX ".
+        Foswiki::Sandbox->sysCommand("$PATHTOLATEX ".
                              ' -interaction=nonstopmode '.
                              $LMPc{'haltonerror'}.
                              ' %FILE|F% ',
@@ -781,7 +782,7 @@ sub renderEquations {
             (my $logf = $LATEXFILENAME) =~ s/\.tex$/\.log/;
             # $sandbox->{TRACE} = 1;
             
-            my ($resp,$ret) = $sandbox->sysCommand( $GREP.' -A 1 ! %LOG|F%',
+            my ($resp,$ret) = Foswiki::Sandbox->sysCommand( $GREP.' -A 1 ! %LOG|F%',
                                                     LOG => $LATEXWDIR.$pathSep.$logf );
             $_[0] .= "\n<hr>Latex rendering error messages:<pre>$resp</pre>\n" 
                 if ( ( length($resp) > 0 ) or ( $ret > 0 ) );
@@ -796,6 +797,13 @@ sub renderEquations {
                        $LATEXLOG, $LATEXWDIR );
         } else {
             $_[0] .= "<br>Latex rendering error!! dvi file was not created.<br>";
+            $_[0] .= "<pre>";
+            open(LF,"$LATEXBASENAME.log");
+            while (<LF>) {
+                $_[0] .= $_ if (m/Error/);
+            }
+            close(LF);
+            $_[0] .= "</pre>";
         }
     }
     if (%mimetex_hash_code_mapping) {
@@ -813,8 +821,16 @@ sub renderEquations {
                        $LMPc{'topic'}, $LMPc{'web'}, 
                        $LATEXLOG, $LATEXWDIR );
         } else {
-            $_[0] .= "<br>Latex rendering error!! pdf file was not created.<br>"
+            $_[0] .= "<br>Latex rendering error!! pdf file was not created.<br>";
+            
+            $_[0] .= "<pre>";
+            open(LF,"$LATEXBASENAME.log");
+            while (<LF>) {
+                $_[0] .= $_ if (m/Error/);
             }
+            close(LF);
+            $_[0] .= "</pre>";
+        }
     }
 
     #clean up the intermediate files
@@ -908,7 +924,7 @@ sub makePNGs {
             # dvipng 1.7 uses 'transparent'
             # dvipng 1.5 uses 'Transparent'
 
-            $sandbox->sysCommand( "$PATHTODVIPNG $args",
+            Foswiki::Sandbox->sysCommand( "$PATHTODVIPNG $args",
                                   DENSITY => $opts{'density'},
                                   EXT => lc($EXT),
                                   GAMMA => ($opts{'gamma'}+1.0),
@@ -926,7 +942,7 @@ sub makePNGs {
                          ($tweakinline ne 0) );
             $ccmd .= " %OUTIMG|F%";
 
-            $sandbox->sysCommand( $PATHTOCONVERT." $ccmd",
+            Foswiki::Sandbox->sysCommand( $PATHTOCONVERT." $ccmd",
                                   DENSITY => $opts{'density'},
                                   EPS => 'pdf_'.$LATEXBASENAME.".pdf[".($num-1)."]",
                                   EXT => lc($EXT),
@@ -937,7 +953,7 @@ sub makePNGs {
 
         } elsif ($opts{'engine'} eq 'mimetex') {
             my $ccmd = $PATHTOMIMETEX.' -d -f %IN|F% ';
-            my ($data,$ret) = $sandbox->sysCommand( $ccmd,
+            my ($data,$ret) = Foswiki::Sandbox->sysCommand( $ccmd,
                                             IN => $key.'.txt' );
 
             if ($ret eq 0) {
@@ -962,7 +978,7 @@ sub makePNGs {
         # $cmd .= $outimg;
         # 
             my ($d,$e) =
-                $sandbox->sysCommand( "$PATHTODVIPS $dvipsargs",
+                Foswiki::Sandbox->sysCommand( "$PATHTODVIPS $dvipsargs",
                                       NUM => $num,
                                       EPS => $LATEXBASENAME.$num.".eps",
                                       DVI => $LATEXBASENAME.".dvi",
@@ -977,7 +993,7 @@ sub makePNGs {
                          # ($tweakinline ne 0) );
             $ccmd .= " %OUTIMG|F%";
 
-            $sandbox->sysCommand( $PATHTOCONVERT." $ccmd",
+            Foswiki::Sandbox->sysCommand( $PATHTOCONVERT." $ccmd",
                                   DENSITY => $opts{'density'},
                                   EPS => $LATEXBASENAME.$num.".eps",
                                   EXT => lc($EXT),
@@ -993,7 +1009,7 @@ sub makePNGs {
                  and ($tweakinline) 
                  and (-x $PATHTOCONVERT) 
                  ) {
-                trimInlineImage($outimg,$sandbox,$opts{'bgcolor'},
+                trimInlineImage($outimg,'',$opts{'bgcolor'},
                                 $LATEXWDIR,$ptsz);
             }
 
@@ -1009,7 +1025,7 @@ sub makePNGs {
             if ( ( $Foswiki::Plugins::VERSION < 1.1 ) ||
                  ( $Foswiki::cfg{Plugins}{LatexModePlugin}{bypassattach}) )
             {
-                # Cairo interface
+                # filesystem interface
                 my $path = &Foswiki::Func::getPubDir() . 
                     "/".$opts{'web'}.'/'.$opts{'topic'};
 
@@ -1018,7 +1034,7 @@ sub makePNGs {
                 move($outimg,$path.$pathSep.$outimg) or 
                     $_[0] .= "<br> LatexModePlugin error: Move of $outimg failedg: $!";
             } else {
-                # Dakar interface
+                # database interface
                 Foswiki::Func::saveAttachment( $opts{'web'},
                                              $opts{'topic'},
                                              $outimg,
@@ -1052,7 +1068,7 @@ sub trimInlineImage_v2 {
     my ($in,$sandbox,$bgcolor,$LATEXWDIR,$ptsz) = @_;
 
     (my $out = $in ) =~ s/\.(png|gif)/.xpm/;
-    $sandbox->sysCommand("$PATHTOCONVERT %IN|F%  %OUT|F%",
+    Foswiki::Sandbox->sysCommand("$PATHTOCONVERT %IN|F%  %OUT|F%",
                          IN => $in,
                          OUT => $out );
 
@@ -1168,7 +1184,7 @@ sub trimInlineImage_v2 {
     close(F);
 
 
-    $sandbox->sysCommand("$PATHTOCONVERT mod_%OUT|F% -antialias -transparent %BGC|S% %IN|F%",
+    Foswiki::Sandbox->sysCommand("$PATHTOCONVERT mod_%OUT|F% -antialias -transparent %BGC|S% %IN|F%",
                          OUT => $out,
                          BGC => $bgcolor,
                          IN  => $in);
@@ -1190,7 +1206,7 @@ sub trimInlineImage_v1 {
     # system("echo \"$PATHTOCONVERT $args\" >> $LATEXLOG") if ($debug);
 
     my ($d,$e) = 
-        $sandbox->sysCommand("$PATHTOCONVERT %IN|F% ".
+        Foswiki::Sandbox->sysCommand("$PATHTOCONVERT %IN|F% ".
                              " -background %BGC|S% -trim ".
                              " %OUT|F% ",
                              IN => $tmpfile,
@@ -1217,7 +1233,7 @@ sub trimInlineImage_v1 {
     # system("$PATHTOCONVERT $tmpfile $cmd");
     # system("echo \"$PATHTOCONVERT $tmpfile $cmd\" >> $LATEXLOG") if ($debug);
     ($d,$e) = 
-        $sandbox->sysCommand("$PATHTOCONVERT %INIMG|F% ".
+        Foswiki::Sandbox->sysCommand("$PATHTOCONVERT %INIMG|F% ".
                              " -crop ".
                              '%NW|N%'.'x'.'%NH|N%'.
                              '+'.'%SH|N%'.'+'.'%SH2|N%'.
