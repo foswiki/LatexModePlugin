@@ -223,7 +223,6 @@ sub handleAlltex
     $math_string =~ s!%.*?\n!!gs;
     $math_string =~ s!LMPpcntLMP!%!g;
 
-
     my ($pre,$doc);
     #everything between \documentclass and \begin{doc..} is preamble
     if ( $math_string =~ m!(\\documentclass\s*(\[.*?\])?\s*\{.*?\})\s*(\[.*?\])?(.*?)\\begin\s*\{document\}\s*(.*?)\s*\\end\s*\{document\}!is ) {
@@ -243,8 +242,10 @@ sub handleAlltex
     if ( exists(Foswiki::Func::getContext()->{'genpdflatex'}) ) {
         # protect latex new-lines at end of physical lines
         $doc =~ s/(\\\\)$/$1  /gs;
-        #protect paragraph breaks
+        # protect paragraph breaks
         $doc =~ s/\n\n/\n\\par\n/gs;
+        # protect percent characters
+        $doc =~ s/%/\\%/gs;
 
         return('<latex>'.$doc.'</latex>');
     }

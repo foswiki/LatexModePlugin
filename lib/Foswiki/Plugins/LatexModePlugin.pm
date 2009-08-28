@@ -65,7 +65,7 @@ use vars qw( $VERSION $RELEASE $debug
 
 # number the release version of this plugin
 our $VERSION = '$Rev$';
-our $RELEASE = '3.8';
+our $RELEASE = '4.0';
 # our $SHORTDESCRIPTION = 'Enables <nop>LaTeX markup (mathematics and more) in Foswiki topics';
 
 # =========================
@@ -96,7 +96,7 @@ sub initPlugin
         $sandbox = undef;
     }
 
-    # Foswiki::Func::registerTagHandler( 'REFLATEX', \&handleReferences );
+    Foswiki::Func::registerTagHandler( 'REFLATEX', \&handleReferences );
 
     return 1;
 }
@@ -158,7 +158,7 @@ sub commonTagsHandler
     $_[0] =~ s!%BEGINLATEXPREAMBLE%(.*?)%ENDLATEXPREAMBLE%!&handlePreamble($1)!giseo;
 
     # last, but not least, replace the references to equations with hyperlinks
-    $_[0] =~ s!%REFLATEX{(.*?)}%!&handleReferences($1)!giseo;
+    # $_[0] =~ s!%REFLATEX{(.*?)}%!&handleReferences($1)!giseo;
 }
 
 # =========================

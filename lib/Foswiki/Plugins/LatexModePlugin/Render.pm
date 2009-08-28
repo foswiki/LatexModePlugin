@@ -36,6 +36,7 @@ use Digest::MD5 qw( md5_hex );
 
 #we use the basename() function to determine which script is running
 use File::Copy qw( move copy );
+use File::Path;
 use File::Temp;
 
 # use Image::Info to identify image size.
@@ -68,8 +69,9 @@ my $DISABLE = $Foswiki::cfg{Plugins}{LatexModePlugin}{donotrenderlist} ||
     'input,include,catcode';
 my @norender = split(',',$DISABLE);
 
-my $tweakinline = $Foswiki::cfg{Plugins}{LatexModePlugin}{tweakinline} || 
-    0;
+my $bypassattach = $Foswiki::cfg{Plugins}{LatexModePlugin}{bypassattach} || 1;
+
+my $tweakinline = $Foswiki::cfg{Plugins}{LatexModePlugin}{tweakinline} || 0;
 
 my $GREP =  $Foswiki::cfg{Plugins}{LatexModePlugin}{fgrep} ||
     $Foswiki::fgrepCmd ||
@@ -84,8 +86,8 @@ $EXT = $Foswiki::cfg{Plugins}{LatexModePlugin}{imagetype} || 'png';
 
 #this is the name of the latex file created by the program.  You shouldn't
 #need to change it unless for some bizarre reason you have a file attached to
-#a Foswiki topic called twiki_math or twiki_math.tex
-my $LATEXBASENAME = 'twiki_math';
+#a Foswiki topic called latex_math or latex_math.tex
+my $LATEXBASENAME = 'latex_math';
 my $LATEXFILENAME = $LATEXBASENAME . '.tex';
 
 
@@ -435,7 +437,7 @@ sub createTempLatexFiles {
             my ($ext,$af) = ('','');
             my @extlist = ('','.eps','.eps.gz','.pdf','.png','.jpg');
             if ( ( $Foswiki::Plugins::VERSION < 1.1 ) or
-                 ( $Foswiki::cfg{Plugins}{LatexModePlugin}{bypassattach}) ) { 
+                 ( $bypassattach ) ) { 
                 # filesystem interface
                 
                 $af = join( $pathSep, &Foswiki::Func::getPubDir(),
@@ -605,7 +607,7 @@ sub renderEquations {
     my %extfiles = ();
     $path = &Foswiki::Func::getPubDir() . "/".$LMPc{'web'}.'/'.$LMPc{'topic'};
     if ( ( $Foswiki::Plugins::VERSION < 1.1 )  or
-         ( $Foswiki::cfg{Plugins}{LatexModePlugin}{bypassattach}) ) {
+         ( $bypassattach ) ) {
         # filesystem interface
         opendir(D,$path);
         my @a = grep(/\.$EXT$/,readdir(D));
@@ -662,7 +664,7 @@ sub renderEquations {
                     $fn = Foswiki::Sandbox::normalizeFileName($1);
                     
                     if ( ( $Foswiki::Plugins::VERSION < 1.1 ) or
-                         ( $Foswiki::cfg{Plugins}{LatexModePlugin}{bypassattach}) ) { 
+                         ( $bypassattach ) ) { 
                         # filesystem interface
                         unlink( $path.$pathSep.$fn ) if (-f $path.$pathSep.$fn);
                     } else {
@@ -688,7 +690,7 @@ sub renderEquations {
 
         my $path = &Foswiki::Func::getPubDir() .$pathSep.$w.$pathSep.$t.$pathSep;
         if ( ( $Foswiki::Plugins::VERSION < 1.1 )  or
-             ( $Foswiki::cfg{Plugins}{LatexModePlugin}{bypassattach}) ) {
+             ( $bypassattach ) ) {
             # filesystem interface
             if ( (-f $path.'latex'.$key.'.'.$EXT ) and 
                  !($LMPc{'rerender'}) ) {
@@ -949,12 +951,14 @@ sub makePNGs {
                                   GAMMA => $opts{'gamma'},
                                   BGC => $opts{'bgcolor'},
                                   OUTIMG => $outimg,
-                                  LOG => $LATEXLOG );
+                                  LOG => $LATEXLOG ) 
+		if (-x $PATHTOCONVERT);
 
         } elsif ($opts{'engine'} eq 'mimetex') {
             my $ccmd = $PATHTOMIMETEX.' -d -f %IN|F% ';
             my ($data,$ret) = Foswiki::Sandbox->sysCommand( $ccmd,
-                                            IN => $key.'.txt' );
+                                            IN => $key.'.txt' )
+		if (-x $PATHTOMIMETEX);
 
             if ($ret eq 0) {
                 open(OI,">$outimg");
@@ -982,7 +986,8 @@ sub makePNGs {
                                       NUM => $num,
                                       EPS => $LATEXBASENAME.$num.".eps",
                                       DVI => $LATEXBASENAME.".dvi",
-                                      LOG => $LATEXLOG );
+                                      LOG => $LATEXLOG )
+		if (-x $PATHTODVIPS);
             # print STDERR "dvips: $d $e" if length($d) > 0;
 
         # system("echo \"$PATHTOCONVERT $cmd\" >> $LATEXLOG") if ($debug);
@@ -1000,7 +1005,8 @@ sub makePNGs {
                                   GAMMA => $opts{'gamma'},
                                   BGC => $opts{'bgcolor'},
                                   OUTIMG => $outimg,
-                                  LOG => $LATEXLOG );
+                                  LOG => $LATEXLOG )
+		if (-x $PATHTOCONVERT);
 
         }
         if (-f $outimg) {
@@ -1023,13 +1029,13 @@ sub makePNGs {
             # $_[0] =~ s/($outimg\")/$1 $str/;
 
             if ( ( $Foswiki::Plugins::VERSION < 1.1 ) ||
-                 ( $Foswiki::cfg{Plugins}{LatexModePlugin}{bypassattach}) )
+                 ( $bypassattach ) )
             {
                 # filesystem interface
                 my $path = &Foswiki::Func::getPubDir() . 
                     "/".$opts{'web'}.'/'.$opts{'topic'};
 
-                mkdir( $path.$pathSep )unless (-e $path.$pathSep);
+                mkpath( $path.$pathSep ) unless (-e $path.$pathSep);
 
                 move($outimg,$path.$pathSep.$outimg) or 
                     $_[0] .= "<br> LatexModePlugin error: Move of $outimg failedg: $!";
@@ -1068,9 +1074,10 @@ sub trimInlineImage_v2 {
     my ($in,$sandbox,$bgcolor,$LATEXWDIR,$ptsz) = @_;
 
     (my $out = $in ) =~ s/\.(png|gif)/.xpm/;
-    Foswiki::Sandbox->sysCommand("$PATHTOCONVERT %IN|F%  %OUT|F%",
+    Foswiki::Sandbox->sysCommand("$PATHTOCONVERT -colors 16 -trim %IN|F%  %OUT|F%",
                          IN => $in,
-                         OUT => $out );
+                         OUT => $out )
+	if (-x $PATHTOCONVERT);
 
     my ($pre, $xpm) = ('','');
     my ($canvaschar,$cpp) = (' ',1);
@@ -1118,20 +1125,28 @@ sub trimInlineImage_v2 {
         } else {
             $pre .= $_;
             if ($_ =~ m/\"(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\"/) {
-                $cpp = $4;
+                # the first line of numbers in an xpm file gives:
+                # /* columns rows colors chars-per-pixel */
+                $cpp = $4;      # save the chars-per-pixel value
                 &Foswiki::Func::writeDebug( "cpp:'".$cpp."'" ) if ($debug);
             }
             if ($_ =~ m/None|gray100/) {
                 $canvaschar = substr($_,1,$cpp);
             }
             # &Foswiki::Func::writeDebug( "canvaschar:'".$canvaschar."'" ) if ($debug);
-
         }
-        $flag = 1 if m!/\*\spixels\s\*/!; # switch between 'pre' and the image
+
+        if (m!/\*\spixels\s\*/!) { # switch between 'pre' and the image
+            $flag = 1;
+            # 
+            my @llns = split(/\n/,$pre);
+            
+            $canvaschar = substr($llns[-2],1,$cpp) 
+                if ($canvaschar eq ' ');
+            # reset the background value
+        }
     }
     close(F);
-    # print $xpm;
-
 
     # print "$cnt  $midu $midl $col\n";
     # print "blank uptop: ".($midu)."\n";
@@ -1187,7 +1202,8 @@ sub trimInlineImage_v2 {
     Foswiki::Sandbox->sysCommand("$PATHTOCONVERT mod_%OUT|F% -antialias -transparent %BGC|S% %IN|F%",
                          OUT => $out,
                          BGC => $bgcolor,
-                         IN  => $in);
+                         IN  => $in)
+	if (-x $PATHTOCONVERT);
 
     unlink("mod_$out") unless ($debug);
     unlink("$out") unless ($debug);
@@ -1211,7 +1227,8 @@ sub trimInlineImage_v1 {
                              " %OUT|F% ",
                              IN => $tmpfile,
                              BGC => $bgcolor,
-                             OUT => $outimg );
+                             OUT => $outimg )
+	if (-x $PATHTOCONVERT);
     # print STDERR "convert: $d $e\n" if ($e > 0);
     
     my $img2 = image_info($outimg);
@@ -1245,7 +1262,8 @@ sub trimInlineImage_v1 {
                              SH2 => $sh2,
                              BGC => $bgcolor,
                              OUTIMG => $outimg
-                             );
+                             )
+	if (-x $PATHTOCONVERT);
     # print STDERR "convert: $d $e\n" if ($e > 0);
     unlink("$tmpfile") unless ($debug);
     

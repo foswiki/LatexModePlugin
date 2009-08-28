@@ -422,9 +422,9 @@ This plugin is an enhanced version of the Foswiki:Extensions.MathModePlugin main
 ---++ Plugin Info
 
 |  Plugin Author: | Foswiki:Main.ScottHoge |
-|  Plugin Version: | 23 Nov 2008 (v 4.0, SVN:%$VERSION%)  |
+|  Plugin Version: | 27 Aug 2009 (v 4.0, SVN:%$VERSION%)  |
 |  Change History: | %ICON{warning}% v4.0 and above requires Foswiki 1.x.x and above %ICON{warning}% <!-- versions below in reverse order --> |
-|   23 Nov 2008 (v 4.0) | a few bug fixes. ported to Foswiki |
+|   27 Aug 2009 (v 4.0) | Ported to Foswiki and fixed a few bugs. |
 |  Change History: | %ICON{warning}% v3.x requires TWiki 4.x.x and above %ICON{warning}% <!-- versions below in reverse order --> |
 |   27 Oct 2008 (v 3.74) | replaced plugin init with lazy-loading, to fix installer bug |
 |   24 Jun 2008 (v 3.73) | fewer bugs: TOC interaction corrected, cant-see-mimetex-images-in-win32 bug fixed |

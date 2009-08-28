@@ -85,9 +85,11 @@ sub handleReferences
 # This function converts references to defined
 # equations/figures/tables and replaces them with the Eqn/Fig/Tbl
 # number
-### my ( $math_string ) = @_;   # do not uncomment, use $_[0], $_[1] instead
 
-    my $ref = $_[0];	
+    my($session, $params, $theTopic, $theWeb) = @_;
+
+    my $ref = $params->{_DEFAULT};
+
     my ($backref,$txt) = ("",""); 
 
     my %LMPc = %{ Foswiki::Func::getContext()->{'LMPcontext'} };
@@ -130,7 +132,7 @@ sub handleReferences
 # =========================
 sub handleFloat
 {
-# This function mimics the construction of float environments in latex,
+# This function mimics the construction of float environments in LaTeX,
 # producing a back-reference list for Figures and Tables.
 
 ### my ( $input ) = @_;   # do not uncomment, use $_[0], $_[1] instead
