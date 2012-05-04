@@ -14,7 +14,7 @@
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details, published at 
+# GNU General Public License for more details, published at
 # http://www.gnu.org/copyleft/gpl.html
 #
 # =========================
@@ -49,91 +49,95 @@ my %commands;
 
 # to prevent executing arbitrary code in the 'eval' below, allow
 # only registered commands to run.
-my @regSubs = ( '&addToTitle', '&formThanks', '&handleAuthor', '&makeTitle', '&formBib', '&formInst' );
+my @regSubs = (
+    '&addToTitle', '&formThanks', '&handleAuthor', '&makeTitle',
+    '&formBib',    '&formInst'
+);
 
 # read in the latex2tml configuration
 while (<DATA>) {
-    next if ( length($_) == 0 or $_ =~ m/^\s+$/);
+    next if ( length($_) == 0 or $_ =~ m/^\s+$/ );
 
-    my $s = substr($_,0,1,'');
-    my @a = split(/$s/,$_);
+    my $s = substr( $_, 0, 1, '' );
+    my @a = split( /$s/, $_ );
     my %h;
-    next if ($#a < 0);
+    next if ( $#a < 0 );
 
     $h{'size'} = $a[1];
 
-    $a[2] = substr($a[2],0,length($a[2])-2)."\n" if ($a[2] =~ m/\\n$/);
+    $a[2] = substr( $a[2], 0, length( $a[2] ) - 2 ) . "\n"
+      if ( $a[2] =~ m/\\n$/ );
     $h{'command'} = $a[2];
 
-    $commands{$a[0]} = \%h;
+    $commands{ $a[0] } = \%h;
 }
+
 # close(F);
 # print STDERR "Keys: ";
 # print STDERR map {"$_  "} sort keys %commands;
 # print STDERR ":Keys\n";
 
-my %entities = (  '\`{A}'   => '&Agrave;',
-                  "\\\'{A}" => '&Aacute;',
-                  '\^{A}'   => '&Acirc;' ,
-                  '\"{A}'   => '&Auml;'  ,
-                  '\c{C}'   => '&Ccedil;',
-                  '\`{E}'   => '&Egrave;',
-                  "\\\'{E}" => '&Eacute;',
-                  '\^{E}'   => '&Ecirc;' ,
-                  '\"{E}'   => '&Euml;'  ,
-                  '\`{I}'   => '&Igrave;',
-                  "\\\'{I}" => '&Iacute;',
-                  '\^{I}'   => '&Icirc;' ,
-                  '\"{I}'   => '&Iuml;'  ,
-                  '\~{N}'   => '&Ntilde;',
-                  '\`{O}'   => '&Ograve;',
-                  "\\\'{O}" => '&Oacute;',
-                  '\^{O}'   => '&Ocirc;' ,
-                  '\~{O}'   => '&Otilde;',
-                  '\"{O}'   => '&Ouml;'  ,
-                  '\`{U}'   => '&Ugrave;',
-                  "\\\'{U}" => '&Uacute;',
-                  '\^{U}'   => '&Ucirc;' ,
-                  '\"{U}'   => '&Uuml;'  ,
-                  "\\\'{Y}" => '&Yacute;', 
-                  '\"{Y}'   => '&Yuml;',
-                  '\`{a}'   => '&agrave;',
-                  "\\\'{a}" => '&aacute;',
-                  '\^{a}'   => '&acirc;' ,
-                  '\"{a}'   => '&auml;'  ,
-                  '\c{c}'   => '&ccedil;',
-                  '\`{e}'   => '&egrave;',
-                  "\\\'{e}" => '&eacute;',
-                  '\^{e}'   => '&ecirc;' ,
-                  '\"{e}'   => '&euml;'  ,
-                  '\`{i}'   => '&igrave;',
-                  "\\\'{i}" => '&iacute;',
-                  '\^{i}'   => '&icirc;' ,
-                  '\"{i}'   => '&iuml;'  ,
-                  '\~{n}'   => '&ntilde;',
-                  '\`{o}'   => '&ograve;',
-                  "\\\'{o}" => '&oacute;',
-                  '\^{o}'   => '&ocirc;' ,
-                  '\~{o}'   => '&otilde;',
-                  '\"{o}'   => '&ouml;'  ,
-                  '\`{u}'   => '&ugrave;',
-                  "\\\'{u}" => '&uacute;',
-                  '\^{u}'   => '&ucirc;' ,
-                  '\"{u}'   => '&uuml;'  ,
-                  "\\\'{y}" => '&yacute;', 
-                  '\"{y}'   => '&yuml;' 
-                  );
-
+my %entities = (
+    '\`{A}'   => '&Agrave;',
+    "\\\'{A}" => '&Aacute;',
+    '\^{A}'   => '&Acirc;',
+    '\"{A}'   => '&Auml;',
+    '\c{C}'   => '&Ccedil;',
+    '\`{E}'   => '&Egrave;',
+    "\\\'{E}" => '&Eacute;',
+    '\^{E}'   => '&Ecirc;',
+    '\"{E}'   => '&Euml;',
+    '\`{I}'   => '&Igrave;',
+    "\\\'{I}" => '&Iacute;',
+    '\^{I}'   => '&Icirc;',
+    '\"{I}'   => '&Iuml;',
+    '\~{N}'   => '&Ntilde;',
+    '\`{O}'   => '&Ograve;',
+    "\\\'{O}" => '&Oacute;',
+    '\^{O}'   => '&Ocirc;',
+    '\~{O}'   => '&Otilde;',
+    '\"{O}'   => '&Ouml;',
+    '\`{U}'   => '&Ugrave;',
+    "\\\'{U}" => '&Uacute;',
+    '\^{U}'   => '&Ucirc;',
+    '\"{U}'   => '&Uuml;',
+    "\\\'{Y}" => '&Yacute;',
+    '\"{Y}'   => '&Yuml;',
+    '\`{a}'   => '&agrave;',
+    "\\\'{a}" => '&aacute;',
+    '\^{a}'   => '&acirc;',
+    '\"{a}'   => '&auml;',
+    '\c{c}'   => '&ccedil;',
+    '\`{e}'   => '&egrave;',
+    "\\\'{e}" => '&eacute;',
+    '\^{e}'   => '&ecirc;',
+    '\"{e}'   => '&euml;',
+    '\`{i}'   => '&igrave;',
+    "\\\'{i}" => '&iacute;',
+    '\^{i}'   => '&icirc;',
+    '\"{i}'   => '&iuml;',
+    '\~{n}'   => '&ntilde;',
+    '\`{o}'   => '&ograve;',
+    "\\\'{o}" => '&oacute;',
+    '\^{o}'   => '&ocirc;',
+    '\~{o}'   => '&otilde;',
+    '\"{o}'   => '&ouml;',
+    '\`{u}'   => '&ugrave;',
+    "\\\'{u}" => '&uacute;',
+    '\^{u}'   => '&ucirc;',
+    '\"{u}'   => '&uuml;',
+    "\\\'{y}" => '&yacute;',
+    '\"{y}'   => '&yuml;'
+);
 
 sub printF {
 
     my ($t) = @_;
-    open(F,">>/tmp/alltex_uH.txt");
+    open( F, ">>/tmp/alltex_uH.txt" );
     print F $t;
     close(F);
 
 }
-
 
 =head2 Syntax
 
@@ -206,13 +210,12 @@ will be converted to
 
 =cut
 
-sub handleAlltex
-{
+sub handleAlltex {
 
     my $txt = '';
 
     my $math_string = $_[0];
-    my $params = $_[1];
+    my $params      = $_[1];
 
     #get rid of comments
     # %  ... \n
@@ -223,12 +226,16 @@ sub handleAlltex
     $math_string =~ s!%.*?\n!!gs;
     $math_string =~ s!LMPpcntLMP!%!g;
 
-    my ($pre,$doc);
+    my ( $pre, $doc );
+
     #everything between \documentclass and \begin{doc..} is preamble
-    if ( $math_string =~ m!(\\documentclass\s*(\[.*?\])?\s*\{.*?\})\s*(\[.*?\])?(.*?)\\begin\s*\{document\}\s*(.*?)\s*\\end\s*\{document\}!is ) {
-        
-        $pre = $4;     # preamble
-        $doc = $5;     # document
+    if ( $math_string =~
+m!(\\documentclass\s*(\[.*?\])?\s*\{.*?\})\s*(\[.*?\])?(.*?)\\begin\s*\{document\}\s*(.*?)\s*\\end\s*\{document\}!is
+      )
+    {
+
+        $pre = $4;    # preamble
+        $doc = $5;    # document
 
         Foswiki::Func::getContext()->{'LMPcontext'}->{'preamble'} .= $pre;
         Foswiki::Func::getContext()->{'LMPcontext'}->{'docclass'} .= $1;
@@ -239,22 +246,26 @@ sub handleAlltex
         $doc = $math_string;
     }
 
-    if ( exists(Foswiki::Func::getContext()->{'genpdflatex'}) ) {
+    if ( exists( Foswiki::Func::getContext()->{'genpdflatex'} ) ) {
+
         # protect latex new-lines at end of physical lines
         $doc =~ s/(\\\\)$/$1  /gs;
+
         # protect paragraph breaks
         $doc =~ s/\n\n/\n\\par\n/gs;
+
         # protect percent characters
         $doc =~ s/%/\\%/gs;
 
-        return('<latex>'.$doc.'</latex>');
+        return ( '<latex>' . $doc . '</latex>' );
     }
 
-    Foswiki::Func::getContext()->{'LMPcontext'}->{'title'} = '';
-    Foswiki::Func::getContext()->{'LMPcontext'}->{'thanks'} = '';
+    Foswiki::Func::getContext()->{'LMPcontext'}->{'title'}     = '';
+    Foswiki::Func::getContext()->{'LMPcontext'}->{'thanks'}    = '';
     Foswiki::Func::getContext()->{'LMPcontext'}->{'thankscnt'} = 0;
 
     unlink("/tmp/alltex_uH.txt");
+
     # printF("handleAlltex($params)");
 
 =begin foswiki
@@ -270,17 +281,16 @@ The parsing is done in three stages:
 
 =cut
 
-    $doc = protectVerbatim( $doc );
+    $doc = protectVerbatim($doc);
     &mathShortToLong($doc);
-    $doc = extractEnvironments( $doc )
-        if ($Foswiki::Plugins::LatexModePlugin::Parse::RELEASE > 0.01);
+    $doc = extractEnvironments($doc)
+      if ( $Foswiki::Plugins::LatexModePlugin::Parse::RELEASE > 0.01 );
 
-    $doc = extractBlocks( $doc )
-        if ($Foswiki::Plugins::LatexModePlugin::Parse::RELEASE > 0.01);
+    $doc = extractBlocks($doc)
+      if ( $Foswiki::Plugins::LatexModePlugin::Parse::RELEASE > 0.01 );
 
-    $doc = extractSimple( $doc )
-        if ($Foswiki::Plugins::LatexModePlugin::Parse::RELEASE > 0.01);
-
+    $doc = extractSimple($doc)
+      if ( $Foswiki::Plugins::LatexModePlugin::Parse::RELEASE > 0.01 );
 
 =pod
 
@@ -307,38 +317,41 @@ another topic to correct the rendering problems.
     $doc =~ s/%VERBATIMBLOCK\{(.*?)\}%/&extractVerbatim($1)/ge;
     $doc =~ s/%VERBATIMLINE\{(.*?)\}%/&extractVerbatim($1)/ge;
 
-    open(F,">/tmp/after_eB.txt");
+    open( F, ">/tmp/after_eB.txt" );
     print F $doc;
-    print F "\n"; print F 'x'x70; print F "\n";
+    print F "\n";
+    print F 'x' x 70;
+    print F "\n";
     close(F);
 
-    $doc = "<verbatim>\n".$doc."\n</verbatim>\n"
-    if ( Foswiki::Func::getContext()->{'LMPcontext'}->{'alltexmode'} );
+    $doc = "<verbatim>\n" . $doc . "\n</verbatim>\n"
+      if ( Foswiki::Func::getContext()->{'LMPcontext'}->{'alltexmode'} );
+
     #we are done!
-    return($doc);
+    return ($doc);
 
 }
 
+my %simple = (    # '\~' => '&nbsp;',
+    '\\noindent'   => '',
+    '\\\\'         => "<br>",
+    '\vfill'       => '',
+    '\newblock'    => '',
+    '``'           => '&ldquo;',
+    "''"           => '&rdquo;',
+    '\\o'          => '&oslash;',
+    '\\O'          => '&Oslash;',
+    '\\AA'         => '&Aring;',
+    '\\aa'         => '&aring;',
+    '\\ae'         => '&aelig;',
+    '\\AE'         => '&AElig;',
+    '\\mainmatter' => '',
+    '\\clearpage'  => '',
+    '\\centering'  => '',           # clear it, if not caught in block proc
+    '\\sloppy'     => ''
+);
 
-my %simple = ( # '\~' => '&nbsp;',
-               '\\noindent' => '',
-               '\\\\' => "<br>",
-               '\vfill' => '',
-               '\newblock' => '',
-               '``' => '&ldquo;',
-               "''" => '&rdquo;', 
-               '\\o' => '&oslash;',
-               '\\O' => '&Oslash;',
-               '\\AA' => '&Aring;',
-               '\\aa' => '&aring;',
-               '\\ae' => '&aelig;',
-               '\\AE' => '&AElig;',
-               '\\mainmatter' => '',
-               '\\clearpage' => '',
-               '\\centering' => '', # clear it, if not caught in block proc
-               '\\sloppy' => '' );
-
-foreach my $c (keys %entities) {
+foreach my $c ( keys %entities ) {
     my $m = $entities{$c};
     $c =~ s/\{|\}//g;
     $simple{$c} = $m;
@@ -350,109 +363,118 @@ sub extractSimple {
 
     # convert simple commands to TML
     # convertSimple($doc);
-    my ($pre,$block);
+    my ( $pre, $block );
     my $txt = '';
     do {
-        ($pre,$block,$doc) = umbrellaHook( $doc,
-                                           '\%BEGINLATEX',
-                                           'ENDLATEX\%');
-        
-        if ( ($pre =~ m/\\/) and (length($pre)>0) ) {
+        ( $pre, $block, $doc ) =
+          umbrellaHook( $doc, '\%BEGINLATEX', 'ENDLATEX\%' );
+
+        if ( ( $pre =~ m/\\/ ) and ( length($pre) > 0 ) ) {
             convertSimple($pre);
+
             # $pre =~ s/(\\\w+)\b/%BEGINLATEX{inline="1"}%$1%ENDLATEX%/g;
             # $pre =~ s/(\\\w+)\b/% \$ $1 \$ %/g;
         }
         $txt .= $pre;
+
         # $txt .= ($pre =~ m!\\!)? processBlock($pre,$n) : $pre ;
         # $txt .= '||'.$pre.'||';
         $txt .= $block;
-        
-    } while ($block ne '');
-    if ( ($doc =~ m/\\/) and (length($doc)>0) ) {
+
+    } while ( $block ne '' );
+    if ( ( $doc =~ m/\\/ ) and ( length($doc) > 0 ) ) {
         convertSimple($doc);
+
         # $doc =~ s/(\\\w+)\b/% \$ $1 \$ %/g;
     }
     $txt .= $doc;
     $doc = $txt;
     $doc =~ s/~+/&nbsp;/g;
 
-    return($doc);
+    return ($doc);
 }
 
-sub convertSimple
-{
-    
-    # $simple{'\\maketitle'} = Foswiki::Func::getContext()->{'LMPcontext'}->{'title'}."\n<br>\n".Foswiki::Func::getContext()->{'LMPcontext'}->{'thanks'}."\n<br>\n";
+sub convertSimple {
 
-    $_[0]=~s/\\maketitle/&makeTitle()/e;
+# $simple{'\\maketitle'} = Foswiki::Func::getContext()->{'LMPcontext'}->{'title'}."\n<br>\n".Foswiki::Func::getContext()->{'LMPcontext'}->{'thanks'}."\n<br>\n";
+
+    $_[0] =~ s/\\maketitle/&makeTitle()/e;
 
     foreach my $c ( keys %simple ) {
-        my $m  = $simple{$c}; 
+        my $m = $simple{$c};
+
         # printF( "$c --> $m\n" );
         $_[0] =~ s/\Q$c\E/$m/g;
     }
+
     # my $s1 = "%BEGINLATEX<nop>%";
     # my $s2 = "%<nop>ENDLATEX%";
-    # 
-    # $_[0] =~ s/(\\\w+)\b/$s1$1$s2/g; # mark all unkown commands 
-    
+    #
+    # $_[0] =~ s/(\\\w+)\b/$s1$1$s2/g; # mark all unkown commands
+
 }
 
-my %embed = ( '\\em' => [ '<em>', '</em>' ],
-              '\\bf' => [ '<strong>', '</strong>' ],
-              '\\small' => [ '<font size="-2">','</font>' ],
-              '\\tiny' => [ '<font size="-3">','</font>' ],
-              '\\footnotesize' => [ '<font size="-4">','</font>' ],
-              '\\large' => [ '<font size="+1">','</font>' ],
-              '\\raggedleft' => [ '<div style="text-align:right">', '</div>' ],
-              '\\centering' => [ '<div align="center">', '</div>' ]
-              );
+my %embed = (
+    '\\em'           => [ '<em>',                           '</em>' ],
+    '\\bf'           => [ '<strong>',                       '</strong>' ],
+    '\\small'        => [ '<font size="-2">',               '</font>' ],
+    '\\tiny'         => [ '<font size="-3">',               '</font>' ],
+    '\\footnotesize' => [ '<font size="-4">',               '</font>' ],
+    '\\large'        => [ '<font size="+1">',               '</font>' ],
+    '\\raggedleft'   => [ '<div style="text-align:right">', '</div>' ],
+    '\\centering'    => [ '<div align="center">',           '</div>' ]
+);
 
-sub convertEmbed
-{
+sub convertEmbed {
     my ($b) = @_;
-
 
     $b =~ s/^\s*\{(.*)\}\s*/$1/gs;
     $b =~ s!\\\/$!!;
+
     # printF("convertEmb  (pre): $b\n");
-    
-    return($b) unless ($b=~m/\\/);
-    foreach my $c ( keys %embed) {
+
+    return ($b) unless ( $b =~ m/\\/ );
+    foreach my $c ( keys %embed ) {
+
         # printF( "$c --> @{$embed{'$c'}}\n" );
-        if ($b =~ s/\Q$c\E\b//g) {
+        if ( $b =~ s/\Q$c\E\b//g ) {
             $c = extractBlocks($c);
-                        
-            $b = $embed{$c}[0].$b.$embed{$c}[1];
+
+            $b = $embed{$c}[0] . $b . $embed{$c}[1];
         }
     }
+
     # printF("convertEmb (post): $b\n");
-    return($b);
+    return ($b);
 }
 
 # use base qw( Foswiki::Plugins::LatexModePlugin );
 
 sub expandSpecialChars {
     return;
-    my ($b,$cmd,$txt) = ('','','');
+    my ( $b, $cmd, $txt ) = ( '', '', '' );
     my (@a);
 
-    if ($cmd =~ m!\\[\`\"\'\^\~\.duvtbHc]$!) {
+    if ( $cmd =~ m!\\[\`\"\'\^\~\.duvtbHc]$! ) {
+
         # map special text characters to html entities
         $b =~ s/\\$cmd$//;
         $txt .= $b;
-        my $t = $cmd.shift(@a);
-        $txt .= ( exists( $entities{$t} ) ) ? 
-            $entities{$t} : 
-            '%BEGINLATEX{inline="1"}%'.$t.'%ENDLATEX%';
+        my $t = $cmd . shift(@a);
+        $txt .=
+          ( exists( $entities{$t} ) )
+          ? $entities{$t}
+          : '%BEGINLATEX{inline="1"}%' . $t . '%ENDLATEX%';
     }
 }
 
 sub expandComplexBlocks {
-    # elsif ( exists( $commands{$cmd} ) ) 
-    my ($cmd,$star,$opts,$aref) = @_;
 
-    my @a = @{$aref};           
+    # elsif ( exists( $commands{$cmd} ) )
+    my ( $cmd, $star, $opts, $aref ) = @_;
+
+    my @a = @{$aref};
+
     # a big downside to this is that it makes a copy of the
     # array... which is the entire text early on.
 
@@ -462,18 +484,20 @@ sub expandComplexBlocks {
     {
 
         # if found command defined in %commands...
-        my $sz = 0;
+        my $sz  = 0;
         my $str = $commands{$cmd}{'command'};
+
         # print F $b." ";
-        while ($sz < $commands{$cmd}{'size'}) {
+        while ( $sz < $commands{$cmd}{'size'} ) {
+
             # grab the number of needed blocks of the stack
             my $t = shift(@a);
-            if (length($t) > 0) {
-                $t = substr($t,1,length($t)-2);
-                printF( "  :".$t.": " );
-                
-                if ($t =~ m/([\d\.]+)\\linewidth/) {
-                    $t = sprintf("%4.2f",($1/1)*100)."\%";
+            if ( length($t) > 0 ) {
+                $t = substr( $t, 1, length($t) - 2 );
+                printF( "  :" . $t . ": " );
+
+                if ( $t =~ m/([\d\.]+)\\linewidth/ ) {
+                    $t = sprintf( "%4.2f", ( $1 / 1 ) * 100 ) . "\%";
                 }
                 $sz++;
                 $str =~ s/\$$sz/$t/gs;
@@ -481,97 +505,106 @@ sub expandComplexBlocks {
         }
         $str =~ s/\$o/$opts/;
         $str =~ s/\$c/$cmd/;
-        
+
         # ensure that foswiki section commands land at the start
         # of a new line
-        $str = "\n\n".$str if ($str=~m/^\-\-\-/); 
-        
-        printF("\n$str\n-+-+-+-\n"); # debug output
-        
+        $str = "\n\n" . $str if ( $str =~ m/^\-\-\-/ );
+
+        printF("\n$str\n-+-+-+-\n");    # debug output
+
         # process the command...
-        
-        my $cmd = $1 if ($str =~ s/^(&\w+)\((.*)\)$/$2/s);
-        
-        $str = extractBlocks($str) if ($str =~ m/\\/); 
-        # convertSimple($str) if ($str =~ m/\\/); 
-        
-        if (defined($cmd)) {
+
+        my $cmd = $1 if ( $str =~ s/^(&\w+)\((.*)\)$/$2/s );
+
+        $str = extractBlocks($str) if ( $str =~ m/\\/ );
+
+        # convertSimple($str) if ($str =~ m/\\/);
+
+        if ( defined($cmd) ) {
             $str =~ s/^(\"|\')|(\"|\')$//g;
             printF("Try dynamic command: $cmd($str)\n");
-            my @z = grep(@regSubs,$cmd);
-            
-            if ($cmd eq $z[0]) {
+            my @z = grep( @regSubs, $cmd );
+
+            if ( $cmd eq $z[0] ) {
                 my $t;
-                eval('$t = '.$cmd.'($str);'); 
-                printF(" ".$@) if $@;
+                eval( '$t = ' . $cmd . '($str);' );
+                printF( " " . $@ ) if $@;
                 $txt .= $t;
             }
-        } else {
-            $txt .= $str ; # convertEmbed( $str );
         }
-        printF( "\n" );
-        
-        
+        else {
+            $txt .= $str;    # convertEmbed( $str );
+        }
+        printF("\n");
+
     }
-    return($txt,($cnt-scalar(@a)));
+    return ( $txt, ( $cnt - scalar(@a) ) );
 }
 
 sub processBlock {
-    my ($b,$n) = @_;
+    my ( $b, $n ) = @_;
 
-    my $txt = '';# " <b>BLOCK-$n:</b>";
+    my $txt = '';            # " <b>BLOCK-$n:</b>";
 
     $b = convertEmbed($b);
 
-    if ($b =~ m/^(.+?)%BEGINLATEX.*?ENDLATEX%/s)  {
+    if ( $b =~ m/^(.+?)%BEGINLATEX.*?ENDLATEX%/s ) {
         my $g = $b;
-        my ($o2,$n2) = (undef,undef);
+        my ( $o2, $n2 ) = ( undef, undef );
         do {
+
             # printF( "====".$g."=====\n" );
-            my $o1 = $1; $o2 = $2;
-            my $n1 = $o1; $n2 = $o2;
-            if ($n1=~m/\\\w+/) {
+            my $o1 = $1;
+            $o2 = $2;
+            my $n1 = $o1;
+            $n2 = $o2;
+            if ( $n1 =~ m/\\\w+/ ) {
                 $n1 = extractBlocks($n1);
             }
+
             # printF( "==__".$n1."__===\n" );
             $b =~ s/\Q$o1\E/$n1/;
-        } while ($g =~ s/\G(.*?)%BEGINLATEX.*?ENDLATEX%(.*)/$2/sg);
-        
-        if (length($o2)>0) {
+        } while ( $g =~ s/\G(.*?)%BEGINLATEX.*?ENDLATEX%(.*)/$2/sg );
+
+        if ( length($o2) > 0 ) {
+
             # if ($n2=~m/\\\w+/) {
             $n2 = extractBlocks($n2);
+
             # }
             # printF( "\n=+=+".$b."+=+= $o2\n" );
             $b =~ s/\Q$o2\E/$n2/;
+
             # printF( "\n=-=-".$b."-=-=\n" );
         }
-    # } else {
+
+        # } else {
         # convertSimple($b);
     }
-    
+
     # printF("calling convertEmbed\n");
     $b = convertEmbed($b);
     $txt .= $b;
 
     # $txt .= "<b>:BLOCK-$n</b> ";
-    return($txt);
+    return ($txt);
 }
 
 # sub process_Block_Old {
 #     my ($b,$n) = @_;
-# 
+#
 #     my $txt =  " <b>BLOCK-$n:</b>";
-# 
+#
 #     $b = convertEmbed($b);
-# 
+#
 #     # # examine everything outside of the BEGINLATEX .. ENDLATEX blocks
-#     # # 
+#     # #
 #     my ($pre,$block);
 #     do {
 #         ($pre,$block,$b) = umbrellaHook( $b,
 #                                          '\%BEGINLATEX',
 #                                          'ENDLATEX\%');
-#         
+#
 #         if ( ($pre =~ m/\\/) and (length($pre)>0) ) {
 #             # $pre = extractBlocks($pre);
 #             convertSimple($pre);
@@ -582,56 +615,62 @@ sub processBlock {
 #         #  $txt .= ($pre =~ m!\\!)? processBlock($pre,$n) : $pre ;
 #         # $txt .= '||'.$pre.'||';
 #         $txt .= $block;
-#         
+#
 #     } while ($block ne '');
 #     # $b = extractBlocks($b);
 #     convertSimple($b);
-# 
+#
 #     $txt .= ' <em>OB:</em>'.$b.'<em>:OB </em>' if (length($b)>0);
-# 
+#
 #     $txt .= "<b>:BLOCK-$n</b> ";
 #     return($txt);
 # }
-# 
+#
 
 sub extractBlocks {
 
     my $doc = $_[0];
 
-    my($pre,$block);
+    my ( $pre, $block );
     my $txt = '';
-    #resuse $pre for beginning    
+
+    #resuse $pre for beginning
 
     my @a;
 
-    printF('x'x70); printF("\n");
+    printF( 'x' x 70 );
+    printF("\n");
     printF($doc);
-    printF('x'x70); printF("\n");
-    return($doc) unless ($doc =~ m/\{|\}/);
+    printF( 'x' x 70 );
+    printF("\n");
+    return ($doc) unless ( $doc =~ m/\{|\}/ );
 
     ## parse once through to collect all nested braces
     do {
-	($pre,$block,$doc) = umbrellaHook( $doc,
-                                       '\{',
-                                       '\}');
+        ( $pre, $block, $doc ) = umbrellaHook( $doc, '\{', '\}' );
 
-        if ($pre =~ m/^(.*)(\\[\w\*]+?)$/s) {
-            push(@a,$1);        # before command
-            push(@a,$2);        # command
-        } elsif ( ($pre =~ m/[A-Z]+$/) || 
-                  ($doc =~ m/^\%/) ){
+        if ( $pre =~ m/^(.*)(\\[\w\*]+?)$/s ) {
+            push( @a, $1 );    # before command
+            push( @a, $2 );    # command
+        }
+        elsif (( $pre =~ m/[A-Z]+$/ )
+            || ( $doc =~ m/^\%/ ) )
+        {
+
             # printF("++ $pre ++ $block ++ $doc\n");
             # protect foswiki macros, like %BEGINFIGURE{ ... }%
-            $block = $pre.$block.substr($doc,0,1,'');
+            $block = $pre . $block . substr( $doc, 0, 1, '' );
             printF("protecting '$block'\n");
-        } else {
-            push(@a,$pre);
         }
-        push(@a,$block);
+        else {
+            push( @a, $pre );
+        }
+        push( @a, $block );
 
-    } while ($block ne '');
+    } while ( $block ne '' );
+
     #there is still some $doc left, so push it onto the stack:
-    push(@a,$doc);
+    push( @a, $doc );
 
     #### Convert the found blocks
     my $b = '';
@@ -639,133 +678,164 @@ sub extractBlocks {
         $b = shift(@a);
 
         ## lump the BEGINLATEX .. ENDLATEX blocks together:
-        my $cnt = 0; 
-        while ($b=~m/\%(BEGIN|END)LATEX/g) { 
-            ($1 eq 'BEGIN') ? $cnt++ : $cnt--;
+        my $cnt = 0;
+        while ( $b =~ m/\%(BEGIN|END)LATEX/g ) {
+            ( $1 eq 'BEGIN' ) ? $cnt++ : $cnt--;
         }
-        printF( "\n-- ".scalar(@a)."  $cnt\nb: ".$b ) if ($cnt != 0);
-        while ( ($cnt !=0) and (scalar(@a) >0) ) {
+        printF( "\n-- " . scalar(@a) . "  $cnt\nb: " . $b ) if ( $cnt != 0 );
+        while ( ( $cnt != 0 ) and ( scalar(@a) > 0 ) ) {
             my $c = shift(@a);
-            if ($c =~ s/^(.*?ENDLATEX%)//s) {
+            if ( $c =~ s/^(.*?ENDLATEX%)//s ) {
                 $b .= $1;
-                unshift(@a,$c);
+                unshift( @a, $c );
+
                 # printF( "\n***** $a[0]\n" );
                 # printF( "\nxx ".scalar(@a)."\n".$b );
                 $cnt = 0;
-            } else {
+            }
+            else {
                 $b .= $c;
             }
         }
-        printF( "\n++ ".scalar(@a)."\nb: ''".$b."''\n" );
+        printF( "\n++ " . scalar(@a) . "\nb: ''" . $b . "''\n" );
         ## BEGINLATEX .. ENDLATEX blocks are now grouped, proceed to treat
         ## remaining tex commands of the form '\cmd{}' and '\cmd'
-        my $NN = ($b =~ m/(\n+)$/) ? $1 : '';
+        my $NN = ( $b =~ m/(\n+)$/ ) ? $1 : '';
         $b =~ s/\s+$//;
         $b .= $NN;
 
-        if ($b=~m/\\[\"\'\`\^\~\.\[\]\*\=\,\\\w]+$/) {
-            # if the block is a command, it's a complex command
-            my ($cmd,$star,$opts) = ('','','');
-            ($cmd,$star,$opts) = ($1,$2,$3) if
-                (
-                 ($b =~ s!(\\[\"\'\`\^\~\.duvtbHc])$!!) # test for single char commands
-                 or 
-                 ($b =~ s!(\\\w+)\b(\*?)(\[
-                                         ([\\\w\d\.\=\,\s]+?)
-                                         \])?$!!xs) # test for a latex command;
-                 );
-            $star = '' unless defined($star);
-            printF( "\nFound command: $cmd$star ") if ($cmd ne '');
-            (defined($opts) and ($opts ne '') ) ?
-                printF(" opts = $opts \n") : printF("\n");
+        if ( $b =~ m/\\[\"\'\`\^\~\.\[\]\*\=\,\\\w]+$/ ) {
 
-            if ($cmd =~ m!\\[\`\"\'\^\~\.duvtbH]$!) {
+            # if the block is a command, it's a complex command
+            my ( $cmd, $star, $opts ) = ( '', '', '' );
+            ( $cmd, $star, $opts ) = ( $1, $2, $3 )
+              if (
+                ( $b =~ s!(\\[\"\'\`\^\~\.duvtbHc])$!!
+                )    # test for single char commands
+                or (
+                    $b =~ s!(\\\w+)\b(\*?)(\[
+                                         ([\\\w\d\.\=\,\s]+?)
+                                         \])?$!!xs
+                )    # test for a latex command;
+              );
+            $star = '' unless defined($star);
+            printF("\nFound command: $cmd$star ") if ( $cmd ne '' );
+            ( defined($opts) and ( $opts ne '' ) )
+              ? printF(" opts = $opts \n")
+              : printF("\n");
+
+            if ( $cmd =~ m!\\[\`\"\'\^\~\.duvtbH]$! ) {
+
                 # map special text characters to html entities
                 # $b =~ s/\\$cmd$//;
                 $txt .= $b;
-                my $t = $cmd.shift(@a);
+                my $t = $cmd . shift(@a);
                 printF($t);
-                $txt .= ( exists( $entities{$t} ) ) ? 
-                    $entities{$t} : 
-                    '%BEGINLATEX{inline="1"}%'.$t.'%ENDLATEX%';
-            } elsif ($cmd ne '') {
+                $txt .=
+                  ( exists( $entities{$t} ) )
+                  ? $entities{$t}
+                  : '%BEGINLATEX{inline="1"}%' . $t . '%ENDLATEX%';
+            }
+            elsif ( $cmd ne '' ) {
+
                 # $txt .= "<em>$cmd$star$opts</em>";
                 if ( exists( $commands{$cmd} ) ) {
+
                     # $txt .= ' (K) '; # known command
-                    if ($cmd eq '\label') {
+                    if ( $cmd eq '\label' ) {
                         my $t = shift(@a);
-                        $t = substr($t,1,length($t)-2);
-                        printF( "  :".$t.": " );
-                        $t = ' %SECLABEL{'.$t.'}% ';
+                        $t = substr( $t, 1, length($t) - 2 );
+                        printF( "  :" . $t . ": " );
+                        $t = ' %SECLABEL{' . $t . '}% ';
                         $txt =~ s/(---\++\!?\s+)([\w\s\$\%\\]+)$/$1$t$2/s;
-                    } else {
+                    }
+                    else {
+
                         # (defined($opts)) ?
                         # $b =~ s/\$cmd\*?\Q$opts\E//;
                         # $b =~ s/\$cmd\*?//;
                         $txt .= $b;
-                        my($a,$trimcnt) = 
-                            expandComplexBlocks($cmd,$star,$opts,\@a);
+                        my ( $a, $trimcnt ) =
+                          expandComplexBlocks( $cmd, $star, $opts, \@a );
                         $txt .= $a;
-                        foreach (1 .. $trimcnt) { shift(@a); }
+                        foreach ( 1 .. $trimcnt ) { shift(@a); }
                     }
-                } else {
+                }
+                else {
+
                     # unknown command
-                    if ($cmd ne '\c') {
-                        my $s1 = "%BEGINLATEX<nop>% "; 
+                    if ( $cmd ne '\c' ) {
+                        my $s1 = "%BEGINLATEX<nop>% ";
+
                         # $b =~ s/(\\[\"\'\`\^\~\.\w]+)$/$s1$1/;
                         $s1 .= $cmd;
                         $s1 .= $star if defined($star);
                         $s1 .= $opts if defined($opts);
-                        $b = $s1.$b;
-                        # if the first character of the next block is a brace, it
-                        # likely means we have a complex command...  So group
-                        # them.
-                        while ( (scalar(@a)>0) and
-                                (($a[0]=~m/^\s*(\{|\})/s) or (length($a[0])==0)) ){
+                        $b = $s1 . $b;
+
+                       # if the first character of the next block is a brace, it
+                       # likely means we have a complex command...  So group
+                       # them.
+                        while (
+                            ( scalar(@a) > 0 )
+                            and (  ( $a[0] =~ m/^\s*(\{|\})/s )
+                                or ( length( $a[0] ) == 0 ) )
+                          )
+                        {
                             $b .= shift(@a);
-                        } 
+                        }
                         $b .= " %<nop>ENDLATEX% ";
                     }
-                    printF($b."\n");
-                    $txt .= $b; 
+                    printF( $b . "\n" );
+                    $txt .= $b;
                 }
-            } else {
-                $txt .= $b;# . "<font size=\"+5\">Parse: shouldn't get here</font>";
             }
-        } elsif ($b=~m/\{/) {
+            else {
+                $txt .=
+                  $b;  # . "<font size=\"+5\">Parse: shouldn't get here</font>";
+            }
+        }
+        elsif ( $b =~ m/\{/ ) {
+
             #
             $b = convertEmbed($b);
-            (my $c=$b)=~s/%BEGINLATEX.*?ENDLATEX%//gs;
-            $c=~s/%\p{IsUpper}+?\{.*\}%//gs; # take out all foswiki macros
-            # should probably look for nested tags
-            
-            $b = extractBlocks($b) if ($c=~m/\{.*\}/);
+            ( my $c = $b ) =~ s/%BEGINLATEX.*?ENDLATEX%//gs;
+            $c =~ s/%\p{IsUpper}+?\{.*\}%//gs;    # take out all foswiki macros
+                 # should probably look for nested tags
+
+            $b = extractBlocks($b) if ( $c =~ m/\{.*\}/ );
             $txt .= $b;
-        } else {
-            (my $c=$b)=~s/%BEGINLATEX.*?ENDLATEX%//gs;
-            $txt .= ( ($c =~ m!\\!) and !($b=~m/^\s*$/)) ? 
-                processBlock($b,scalar(@a)) : $b ;
+        }
+        else {
+            ( my $c = $b ) =~ s/%BEGINLATEX.*?ENDLATEX%//gs;
+            $txt .=
+              ( ( $c =~ m!\\! ) and !( $b =~ m/^\s*$/ ) )
+              ? processBlock( $b, scalar(@a) )
+              : $b;
+
             #$txt .= " <b>BLOCK+".scalar(@a).":</b>".$b.
             #     "<b>:BLOCK+".scalar(@a)."</b> " if !( $b =~ m/^\s*$/);
         }
 
-    } while (scalar(@a)>0);
+    } while ( scalar(@a) > 0 );
 
-    return($txt);
+    return ($txt);
 }
 
 sub pushVerb {
     my $txt1 = '%VERBATIMLINE{';
     my $txt2 = '}%';
 
-    while ($_[0] =~ m/\\verb(\*?)(.)/sg) {
+    while ( $_[0] =~ m/\\verb(\*?)(.)/sg ) {
         my $u = $1;
         my $d = $2;
-        $_[0] =~ s/\\verb\*?\Q$d\E(.+?)\Q$d\E/$txt1.&storeVerbatim($1,$u).$txt2/es;
+        $_[0] =~
+          s/\\verb\*?\Q$d\E(.+?)\Q$d\E/$txt1.&storeVerbatim($1,$u).$txt2/es;
     }
 }
 
 sub mathShortToLong {
+
     #change all $ .. $, $$ .. $$, and \[ .. \] to math environments
     ### warning: can't do this within verbatim blocks!
 
@@ -779,25 +849,26 @@ sub extractEnvironments {
 
     my $doc = $_[0];
 
-    my($pre,$block);
+    my ( $pre, $block );
     my $txt = '';
     do {
-	($pre,$block,$doc) = umbrellaHook( $doc,
-                                           '\\\\begin\s*\{.*?\}',
-                                           '\\\\end\s*\{.*?\}');
+        ( $pre, $block, $doc ) =
+          umbrellaHook( $doc, '\\\\begin\s*\{.*?\}', '\\\\end\s*\{.*?\}' );
+
         # &pushVerb($pre,$1) if ($pre =~ m/\\verb(.)/);
         # &mathShortToLong($pre);
         # $pre = extractEnvironments($pre) if ($pre =~ m/\\begin\{.*?math\}/);
-	$txt .= $pre;
+        $txt .= $pre;
 
         # if ($block =~ m/^\\begin\{verbatim\}/) {
         #     $txt .= '%VERBATIMBLOCK{'.storeVerbatim($block).'}%';
         # } else {
         #     &pushVerb($block,$1) if ($block =~ m/\\verb(.)/);
         #     &mathShortToLong($block);
-            $txt .= convertEnvironment($block) if ($block ne '');
+        $txt .= convertEnvironment($block) if ( $block ne '' );
+
         # }
-    } while ($block ne '');
+    } while ( $block ne '' );
 
     #there is still some $doc left:
     # &pushVerb($doc,$1) if ($doc =~ m/\\verb(.)/);
@@ -805,30 +876,29 @@ sub extractEnvironments {
     # $doc = extractEnvironments($doc) if ($doc =~ m/\\begin\{.*?math\}/);
     $txt .= $doc;
 
-    return($txt);
+    return ($txt);
 }
 
 sub protectVerbatim {
 
     my $doc = $_[0];
 
-    my($pre,$block);
+    my ( $pre, $block );
     my $txt = '';
     do {
-	($pre,$block,$doc) = umbrellaHook( $doc,
-                                           '\\\\begin\s*\{verbatim\}',
-                                           '\\\\end\s*\{verbatim\}');
-	$txt .= $pre;
-        $txt .= '%VERBATIMBLOCK{'.storeVerbatim($block).'}%'
-            unless ($block eq '');
-    } while ($block ne '');
+        ( $pre, $block, $doc ) = umbrellaHook( $doc, '\\\\begin\s*\{verbatim\}',
+            '\\\\end\s*\{verbatim\}' );
+        $txt .= $pre;
+        $txt .= '%VERBATIMBLOCK{' . storeVerbatim($block) . '}%'
+          unless ( $block eq '' );
+    } while ( $block ne '' );
 
     #there is still some $doc left:
     $txt .= $doc;
 
-    &pushVerb($txt,$1) if ($txt =~ m/\\verb(.)/);
+    &pushVerb( $txt, $1 ) if ( $txt =~ m/\\verb(.)/ );
 
-    return($txt);
+    return ($txt);
 }
 
 =head2 Supported Environments
@@ -869,239 +939,267 @@ environments, image rendering occurs at the first unrecognized enviroment.
 
 =cut
 
-sub convertEnvironment
-{
+sub convertEnvironment {
     my ($block) = @_;
 
-    printF("\n"); printF('-'x70); printF("\n");
+    printF("\n");
+    printF( '-' x 70 );
+    printF("\n");
     printF($block);
-    printF("\n"); printF('-'x70); printF("\n");
+    printF("\n");
+    printF( '-' x 70 );
+    printF("\n");
 
     #now process the block!
     $block =~ m!^\\begin\{(.*?)\}!si;
     my $bname = $1;
 
-    my $txt = '';
+    my $txt   = '';
     my $label = '';
-    $label = 'label="'.$1.'"' if ($block=~s!\\label\{(.*?)\}\s*!!);
+    $label = 'label="' . $1 . '"' if ( $block =~ s!\\label\{(.*?)\}\s*!! );
 
-    if ($bname eq 'math') {
-        $txt .= '%BEGINLATEX{inline="1"}%'.$block.'%ENDLATEX%';
+    if ( $bname eq 'math' ) {
+        $txt .= '%BEGINLATEX{inline="1"}%' . $block . '%ENDLATEX%';
     }
-    elsif ( ($bname eq 'displaymath') ||
-            ($bname eq 'eqnarray*') ){
-        $txt .= '%BEGINLATEX{inline="0"}%'.$block.'%ENDLATEX%';
+    elsif (( $bname eq 'displaymath' )
+        || ( $bname eq 'eqnarray*' ) )
+    {
+        $txt .= '%BEGINLATEX{inline="0"}%' . $block . '%ENDLATEX%';
     }
-    elsif ($bname eq 'eqnarray') {
+    elsif ( $bname eq 'eqnarray' ) {
         $block =~ s!(\\\\|\\end\{eqnarray\})!\\nonumber $1!g;
-        $txt .= '%BEGINLATEX{inline="0" '.$label.'}%'.$block.'%ENDLATEX%';
+        $txt .=
+          '%BEGINLATEX{inline="0" ' . $label . '}%' . $block . '%ENDLATEX%';
     }
-    elsif ($bname eq 'center') {
+    elsif ( $bname eq 'center' ) {
         $block =~ s!\\(begin|end)\{center\}!!g;
-        $block =  extractEnvironments($block);
+        $block = extractEnvironments($block);
+
         # $block =  extractBlocks($block);
 
-        $txt .= '<div align="center">'.$block.'</div>';
-    } 
-    elsif ($bname eq 'equation') {
+        $txt .= '<div align="center">' . $block . '</div>';
+    }
+    elsif ( $bname eq 'equation' ) {
         $block =~ s/\n\s*\n/\n/g;
         $block =~ s!\\(begin|end)\{equation\}!\\$1\{displaymath\}!g;
+
         # print STDERR $block."\n";
-        $txt .= '%BEGINLATEX{inline="0" '.$label.'}%'.$block.'%ENDLATEX%';
+        $txt .=
+          '%BEGINLATEX{inline="0" ' . $label . '}%' . $block . '%ENDLATEX%';
     }
-    elsif ( ($bname eq 'flushright') ) {
+    elsif ( ( $bname eq 'flushright' ) ) {
         $block =~ s!^\\begin\{$bname\}!<div style="text-align:right">!;
         $block =~ s!\\end\{$bname\}$!</div>!;
-        
+
         $block = extractEnvironments($block);
+
         # $block = extractBlocks( $block );
         $txt .= $block;
     }
-    elsif ( ($bname eq 'quotation') || ($bname eq 'quote') ) {
+    elsif ( ( $bname eq 'quotation' ) || ( $bname eq 'quote' ) ) {
         $block =~ s!^\\begin\{$bname\}!<blockquote>!;
         $block =~ s!\\end\{$bname\}$!</blockquote>!;
 
         $block = extractEnvironments($block);
+
         # $block .= extractBlocks( $block );
         $txt .= $block;
     }
+
     # elsif ($bname eq 'verbatim') {
     #     $block =~ s!^\\begin\{$bname\}!<verbatim>!;
     #     $block =~ s!\\end\{$bname\}$!</verbatim>!;
     #     $block =~ s/\\(begin|end){math}/\$/g;
     #     $txt .= $block;
     # }
-    elsif ( ($bname =~ m/(itemize|enumerate|description)/ ) ) {
+    elsif ( ( $bname =~ m/(itemize|enumerate|description)/ ) ) {
         my $tag = 'ul>';
-        $tag = 'ol>' if ($1 eq 'enumerate');
-        $tag = 'dl>' if ($1 eq 'description');
+        $tag = 'ol>' if ( $1 eq 'enumerate' );
+        $tag = 'dl>' if ( $1 eq 'description' );
 
         $block =~ s!^\\begin\{$bname\}!\<$tag!;
         $block =~ s!\\end\{$bname\}$!\</$tag!;
-        while ($block =~ m/\\(.+?)\b/g) {
+        while ( $block =~ m/\\(.+?)\b/g ) {
             my $match = $1;
-            my $pos = (pos $block) - length($match) - 1;
-            $txt .= substr($block,0,$pos,'');
+            my $pos   = ( pos $block ) - length($match) - 1;
+            $txt .= substr( $block, 0, $pos, '' );
 
-            if ($match eq 'item') {
-              if ($tag eq 'dl>') {
-                $block =~ s/^\\item\[(.*?)\]/<dt> *$1* <\/dt><dd>/;
-                $block =~ s!^\\item!<dt></dt><dd>!;
-              } else {
-                $block =~ s/^\\item\[(.*?)\]/<li value="$1">/;
-                $block =~ s/^\\item/<li>/;
-              }
+            if ( $match eq 'item' ) {
+                if ( $tag eq 'dl>' ) {
+                    $block =~ s/^\\item\[(.*?)\]/<dt> *$1* <\/dt><dd>/;
+                    $block =~ s!^\\item!<dt></dt><dd>!;
+                }
+                else {
+                    $block =~ s/^\\item\[(.*?)\]/<li value="$1">/;
+                    $block =~ s/^\\item/<li>/;
+                }
             }
-            elsif ($match eq 'subitem') {
+            elsif ( $match eq 'subitem' ) {
                 $block =~ s/^\\subitem/ %BR%&nbsp;&nbsp;&nbsp;&nbsp; /;
             }
-            elsif ($match eq 'begin') {
-                my ($pre,$blk2,$post);
-                ($pre,$block,$post) = umbrellaHook( $block, 
-                                                    '\\\\begin\s*\{.*?\}',
-                                                    '\\\\end\s*\{.*?\}');
-                $txt .= $pre.convertEnvironment($block);
+            elsif ( $match eq 'begin' ) {
+                my ( $pre, $blk2, $post );
+                ( $pre, $block, $post ) =
+                  umbrellaHook( $block, '\\\\begin\s*\{.*?\}',
+                    '\\\\end\s*\{.*?\}' );
+                $txt .= $pre . convertEnvironment($block);
                 $block = $post;
-            } else {            # ignore it...
-                $txt .= substr($block,0,length($match)+2,'');
+            }
+            else {    # ignore it...
+                $txt .= substr( $block, 0, length($match) + 2, '' );
             }
         }
         $txt .= $block;
     }
-    elsif (0) { # ($bname =~ /tabular/) {
+    elsif (0) {       # ($bname =~ /tabular/) {
         printF("=====processing tabular=====\n");
         $block =~ s!^\\begin\{$bname\*?\}(\[\w+\])?!!;
-        $block =~ s!\\end\{$bname\*?\}$!!; 
-        
+        $block =~ s!\\end\{$bname\*?\}$!!;
+
         $block =~ s/\x0d?\n//g;
-        $block =~ s/\{([\@\{\.\}rlc]+)\}\s/ /; # peel off the table structure
+        $block =~ s/\{([\@\{\.\}rlc]+)\}\s/ /;    # peel off the table structure
         printF($block);
 
         my $struct = $1;
         $struct =~ s/\|//g;
-        printF("\nstruct: ".$struct."\n");
+        printF( "\nstruct: " . $struct . "\n" );
         $struct =~ s/\@\{.*?\}//g;
-        my @rows = split(/\\\\/,$block);
+        my @rows = split( /\\\\/, $block );
         my $t = "<table>\n";
         foreach my $r (@rows) {
             $t .= "<tr>";
-            my @l = split(/\&/,$r);
-            if ($l[0]=~s/\\hline//){
-                $t .= '<tr><td colspan="'.length($struct).'">'.
-                    '<hr></td></tr>'."\n";
+            my @l = split( /\&/, $r );
+            if ( $l[0] =~ s/\\hline// ) {
+                $t .=
+                    '<tr><td colspan="'
+                  . length($struct) . '">'
+                  . '<hr></td></tr>' . "\n";
             }
-            foreach my $cnt ( 0 .. (scalar(@l)-1) ) {
-                $t .= "\t".'<td align="';
-                my $a = substr($struct,$cnt,1);
-                if ($a eq 'c') {  $t .= 'center'; }
-                elsif ($a eq 'r') {  $t .= 'right'; }
-                else {  $t .= 'left'; }
+            foreach my $cnt ( 0 .. ( scalar(@l) - 1 ) ) {
+                $t .= "\t" . '<td align="';
+                my $a = substr( $struct, $cnt, 1 );
+                if    ( $a eq 'c' ) { $t .= 'center'; }
+                elsif ( $a eq 'r' ) { $t .= 'right'; }
+                else                { $t .= 'left'; }
                 $t .= '">';
                 $l[$cnt] =~ s/^\s+/ /;
                 $l[$cnt] =~ s/\s+$/ /;
-                if ($l[$cnt] =~ m/\\/) {
-                    $l[$cnt] = extractEnvironments($l[$cnt]);
-                    $l[$cnt] = extractBlocks($l[$cnt]);
+
+                if ( $l[$cnt] =~ m/\\/ ) {
+                    $l[$cnt] = extractEnvironments( $l[$cnt] );
+                    $l[$cnt] = extractBlocks( $l[$cnt] );
                 }
                 $t .= $l[$cnt];
-                $t .= '</td>'."\n";
+                $t .= '</td>' . "\n";
             }
             $t .= "</tr>\n";
         }
-        $t .= "</table>\n";
+        $t   .= "</table>\n";
         $txt .= $t;
         printF("\n$t\n");
         printF("\n===== done with tabular ====\n");
     }
-    elsif ($bname =~ /(figure|table)(\*?)/) {
+    elsif ( $bname =~ /(figure|table)(\*?)/ ) {
         my $type = uc($1);
-        my $span = ($2 eq '*') ? ' span="twoc" ' : '';
+        my $span = ( $2 eq '*' ) ? ' span="twoc" ' : '';
         $block =~ s!^\\begin\{$bname\*?\}(\[\w+\])?!!;
-        $block =~ s!\\end\{$bname\*?\}$!!; 
+        $block =~ s!\\end\{$bname\*?\}$!!;
 
         $block =~ s/(.+)\\caption//s;
         my $env = $1;
 
-        my ($pre,$caption) = ('','');
-	($pre,$caption,$block) = umbrellaHook( $block,
-                                               '\{',
-                                               '\}');
+        my ( $pre, $caption ) = ( '', '' );
+        ( $pre, $caption, $block ) = umbrellaHook( $block, '\{', '\}' );
         $env .= $block;
-        if (length($caption) > 0) {
-            $caption = substr($caption,1,length($caption)-2);
-            if ($caption =~ m/\\/) {
+        if ( length($caption) > 0 ) {
+            $caption = substr( $caption, 1, length($caption) - 2 );
+            if ( $caption =~ m/\\/ ) {
+
                 # $caption = convertEmbed( $caption );
                 $caption = extractEnvironments($caption);
+
                 # captions are stored in the Foswiki tag, which is not
                 # processed later... so process the contents now.
-                $caption = extractBlocks( $caption );
+                $caption = extractBlocks($caption);
                 $caption =~ s/([\"])/\\$1/g;
             }
-            $caption = 'caption="'.$caption.'"';
+            $caption = 'caption="' . $caption . '"';
         }
-        $txt .= '%BEGIN'.$type.'{'.$label.' '.$caption.' '.$span.'}%';
+        $txt .=
+          '%BEGIN' . $type . '{' . $label . ' ' . $caption . ' ' . $span . '}%';
 
         $env = extractEnvironments($env);
+
         # $env = extractBlocks($env);
 
         $txt .= $env;
-        $txt .= '%END'.$type.'%';
+        $txt .= '%END' . $type . '%';
     }
-    elsif ($bname =~ /abstract|keywords/) {
+    elsif ( $bname =~ /abstract|keywords/ ) {
         my $env = $block;
         $env =~ s!\\begin\{$bname\*?\}!!;
-        $env =~ s!\\end\{$bname\*?\}!!; 
+        $env =~ s!\\end\{$bname\*?\}!!;
 
         $env = extractEnvironments($env);
 
-        $txt .= "<blockquote>\n*".ucfirst($bname).":* ".$env."</blockquote>\n";
+        $txt .=
+            "<blockquote>\n*"
+          . ucfirst($bname) . ":* "
+          . $env
+          . "</blockquote>\n";
 
     }
-    elsif ($bname =~ /bibliography/) {
-        # for this to work, the LatexModePlugin must precede the BibtexPlugin
-        # i.e. in LocalSite.cfg: $Foswiki::cfg{PluginsOrder} = 'SpreadSheetPlugin,LatexModePlugin,BibtexPlugin';
+    elsif ( $bname =~ /bibliography/ ) {
+
+# for this to work, the LatexModePlugin must precede the BibtexPlugin
+# i.e. in LocalSite.cfg: $Foswiki::cfg{PluginsOrder} = 'SpreadSheetPlugin,LatexModePlugin,BibtexPlugin';
         my $env = $block;
         $env =~ s!\\begin\{$bname\*?\}(\{\d+\})?!!;
         $env =~ s!\\end\{$bname\*?\}!!;
         $txt .= "\n\n---+ References\n\n<div class=\"bibtex\"><table><tr>";
         my $cnt = 1;
-        while ($env =~ m!\\bibitem\{(.*?)\}!g) {
-            my $t = "<tr valign=\"top\"><td>[<a name=\"$1\">".$cnt."</a>] </td>\n<td> ";
+        while ( $env =~ m!\\bibitem\{(.*?)\}!g ) {
+            my $t =
+                "<tr valign=\"top\"><td>[<a name=\"$1\">" 
+              . $cnt
+              . "</a>] </td>\n<td> ";
             $env =~ s!\\bibitem\{$1\}!$t!;
             $cnt++;
         }
         $env =~ s/\~/&nbsp;/g;
-        while ($env =~ m!\{(.*?)\}!g) {
+        while ( $env =~ m!\{(.*?)\}!g ) {
             my $t = $1;
-            $env =~ s/\{$t\}/$t/ unless ( ($env =~ m!\\[^\s]+\{$t\}!) or
-                                          ($env =~ m!%\w+\{$t\}%!) );
+            $env =~ s/\{$t\}/$t/
+              unless ( ( $env =~ m!\\[^\s]+\{$t\}! )
+                or ( $env =~ m!%\w+\{$t\}%! ) );
         }
-        $txt .= $env."</table></div>\n";
+        $txt .= $env . "</table></div>\n";
     }
     else {
+
         # $txt .= "<br><blockquote>\n---- \n";
-         # $block =~ s/$env/convertEnvironment($env)/e if ($env=~m/\begin\{/);
+        # $block =~ s/$env/convertEnvironment($env)/e if ($env=~m/\begin\{/);
         # $txt .= $block;
-        $txt .= "%BEGINLATEX%\n".$block."\n%ENDLATEX%\n";
+        $txt .= "%BEGINLATEX%\n" . $block . "\n%ENDLATEX%\n";
+
         # $txt .= "<br>\n---- <br></blockquote>\n";
         # $text .= LaTeX2TML($block);
     }
 
-    return($txt);
+    return ($txt);
 }
 
-
-## derived from code contributed by Foswiki:Main.EvanChou 
+## derived from code contributed by Foswiki:Main.EvanChou
 #
 #
 #helper function that grabs the right tag (no need for weird divtree)
 #do not give regex delimiteres that match!
 #
-sub umbrellaHook
-{
+sub umbrellaHook {
+
     #pass in the process text, and delimiters (in regex)
     #returns list (before,umbrella,after) (first one it sees)
-    my $txt = $_[0]; 
+    my $txt     = $_[0];
     my $delim_l = $_[1];
     my $delim_r = $_[2];
 
@@ -1110,48 +1208,51 @@ sub umbrellaHook
     # print F "\n"; print F '-'x70; print F "\n";
     # close(F);
 
-    my $nleft = 0;
+    my $nleft  = 0;
     my $nright = 0;
-    my $umb = '';
+    my $umb    = '';
     my $front;
 
     my $before = '';
 
     my $cnt = 0;
 
-    if($txt =~ s!^(.*?)($delim_l)!!is) {
-	$nleft++;
-	$before = $1;
-	$umb = $2; 
+    if ( $txt =~ s!^(.*?)($delim_l)!!is ) {
+        $nleft++;
+        $before = $1;
+        $umb    = $2;
 
-#	return ($before, $umb,$txt);
-#	my $pl = -1;
-#	my $pr = -1;
+        #	return ($before, $umb,$txt);
+        #	my $pl = -1;
+        #	my $pr = -1;
 
-	while ($nright < $nleft) {
-	    if($txt =~ s!^(.*?)($delim_r)!!is) {
-		$nright++;
-                $front = $1; 
+        while ( $nright < $nleft ) {
+            if ( $txt =~ s!^(.*?)($delim_r)!!is ) {
+                $nright++;
+                $front = $1;
                 $umb .= $1 . $2;
-	    } else {
-		#mismatch!	       		
-		$txt = $before . $umb . $txt;
-		$before = '';
-		$umb = '';
-		last;
-	    }
+            }
+            else {
 
-	    #count how many left's are before this right
-	    while($front =~ m!$delim_l!gis) {
-		$nleft++;
-	    }
-#	    $pl = $nleft;
-#	    $pr = $nright;
-	}
+                #mismatch!
+                $txt    = $before . $umb . $txt;
+                $before = '';
+                $umb    = '';
+                last;
+            }
+
+            #count how many left's are before this right
+            while ( $front =~ m!$delim_l!gis ) {
+                $nleft++;
+            }
+
+            #	    $pl = $nleft;
+            #	    $pr = $nright;
+        }
     }
     else {
     }
-    return ($before, $umb, $txt);
+    return ( $before, $umb, $txt );
 
 }
 
@@ -1161,34 +1262,38 @@ sub handleNewTheorem {
 
     #parse preamble and set up theorem numbering
     #first find the section-linked thm (\newtheorem{$envname}{$type}[section])
-    if($pre =~ m!\\newtheorem\{(.*?)\}\{(.*?)\}\[section\]!i) {
-	#$1 = theorem env name
-	#$2 = theorem type
-	my $thm_envname = $1;
-	my $thm_type = $2;
-	my $thm_maintype = $1;
+    if ( $pre =~ m!\\newtheorem\{(.*?)\}\{(.*?)\}\[section\]!i ) {
 
-	$thmhash{$thm_envname} = $thm_type;
-	$thm_autonumber = 1;
+        #$1 = theorem env name
+        #$2 = theorem type
+        my $thm_envname  = $1;
+        my $thm_type     = $2;
+        my $thm_maintype = $1;
 
-	#now find everything else that is associated with it
-	# \newtheorem{$envname}[$thm_maintype]{$type}
-	$thm_maintype = quotemeta($thm_maintype);
+        $thmhash{$thm_envname} = $thm_type;
+        $thm_autonumber = 1;
 
-#	$txt .= "$thm_maintype \n $pre \n";
-	while ($pre =~ m!\\newtheorem\s*\{(.*?)\}\[$thm_maintype\]\{(.*?)\}!i) {
-	    #$1 = env name
-	    #$2 = thm type
-	    $thm_envname = $1;
-	    $thm_type = $2;
-	    $thmhash{$thm_envname} = $thm_type;
+        #now find everything else that is associated with it
+        # \newtheorem{$envname}[$thm_maintype]{$type}
+        $thm_maintype = quotemeta($thm_maintype);
 
-	    $thm_envname = quotemeta($thm_envname);
-	    $thm_type = quotemeta($thm_type);
-	    $pre =~ s!\\newtheorem\{$thm_envname\}\[$thm_maintype\]\{$thm_type\}!!i;
+        #	$txt .= "$thm_maintype \n $pre \n";
+        while ( $pre =~ m!\\newtheorem\s*\{(.*?)\}\[$thm_maintype\]\{(.*?)\}!i )
+        {
 
-#	    $txt .= "$thm_envname => $thm_type\n";
-	}
+            #$1 = env name
+            #$2 = thm type
+            $thm_envname           = $1;
+            $thm_type              = $2;
+            $thmhash{$thm_envname} = $thm_type;
+
+            $thm_envname = quotemeta($thm_envname);
+            $thm_type    = quotemeta($thm_type);
+            $pre =~
+              s!\\newtheorem\{$thm_envname\}\[$thm_maintype\]\{$thm_type\}!!i;
+
+            #	    $txt .= "$thm_envname => $thm_type\n";
+        }
     }
 }
 
@@ -1342,11 +1447,14 @@ Thanks to <a href="http://twiki.org/cgi-bin/view/Main/EvanChou">EvanChou</a> for
 
 sub storeVerbatim {
     my $t = $_[0];
-    $t =~ s/\s/_/g if ( ($_[1]) and ($_[1] eq '*'));
-    $t =~ s/(^\s+)|(\s+$)//g;   # Foswiki requires no spaces between '=' and verbatim line
+    $t =~ s/\s/_/g if ( ( $_[1] ) and ( $_[1] eq '*' ) );
+    $t =~ s/(^\s+)|(\s+$)//g
+      ;    # Foswiki requires no spaces between '=' and verbatim line
 
     push( @{ Foswiki::Func::getContext()->{'LMPcontext'}->{'verb'} }, $t );
-    return( scalar( @{ Foswiki::Func::getContext()->{'LMPcontext'}->{'verb'} } ) - 1 );
+    return (
+        scalar( @{ Foswiki::Func::getContext()->{'LMPcontext'}->{'verb'} } ) -
+          1 );
 }
 
 sub extractVerbatim {
@@ -1358,96 +1466,99 @@ sub extractVerbatim {
     $block =~ s!^\\begin\{verbatim\}!<verbatim>!;
     $block =~ s!\\end\{verbatim\}$!</verbatim>!;
 
-    $block = '='.$block.'=' unless ($block =~ m/\<verbatim\>/);
+    $block = '=' . $block . '=' unless ( $block =~ m/\<verbatim\>/ );
 
-    return( $block );
+    return ($block);
 }
 
 sub addToTitle {
 
-    my ($str) = @_;   
+    my ($str) = @_;
 
-    Foswiki::Func::getContext()->{'LMPcontext'}->{'title'} .= $str."\n";
-    printF( "title now:\n".Foswiki::Func::getContext()->{'LMPcontext'}->{'title'} );
-    return('');
+    Foswiki::Func::getContext()->{'LMPcontext'}->{'title'} .= $str . "\n";
+    printF( "title now:\n"
+          . Foswiki::Func::getContext()->{'LMPcontext'}->{'title'} );
+    return ('');
 }
 
 sub formThanks {
     my ($str) = @_;
 
-    my $cnt =   Foswiki::Func::getContext()->{'LMPcontext'}->{'thankscnt'};
+    my $cnt = Foswiki::Func::getContext()->{'LMPcontext'}->{'thankscnt'};
     $cnt = $cnt + 1;
 
     Foswiki::Func::getContext()->{'LMPcontext'}->{'thanks'} .=
-        $cnt.'. '.$str."<br>\n";
+      $cnt . '. ' . $str . "<br>\n";
 
     Foswiki::Func::getContext()->{'LMPcontext'}->{'thankscnt'} = $cnt;
 
     # return( '%BEGINLATEX{inline="1"}% $^'.$cnt.'$ %ENDLATEX%' );
-    return( '<sup>'.$cnt.'</sup>' );
+    return ( '<sup>' . $cnt . '</sup>' );
 
 }
 
 sub makeTitle {
-    my $t = Foswiki::Func::getContext()->{'LMPcontext'}->{'title'}.
-        "\n<br>\n".
-        Foswiki::Func::getContext()->{'LMPcontext'}->{'thanks'}.
-        "\n<br>\n";
-    return( $t );
+    my $t =
+        Foswiki::Func::getContext()->{'LMPcontext'}->{'title'}
+      . "\n<br>\n"
+      . Foswiki::Func::getContext()->{'LMPcontext'}->{'thanks'}
+      . "\n<br>\n";
+    return ($t);
 }
 
 sub formBib {
     my ($str) = @_;
     printF("formBib: $str ");
 
-    if ($str =~ m/style\=/) {
+    if ( $str =~ m/style\=/ ) {
         Foswiki::Func::getContext()->{'LMPcontext'}->{'bibstyle'} = $str;
-        return('');
-    } else {
+        return ('');
+    }
+    else {
 
         my $style = Foswiki::Func::getContext()->{'LMPcontext'}->{'bibstyle'};
         my @files = ();
         $str =~ s/.*?\=\"(.*)\"$/$1/;
-        foreach my $f (split(/\,/,$str)) {
-            push(@files,$f.".bib");
+        foreach my $f ( split( /\,/, $str ) ) {
+            push( @files, $f . ".bib" );
         }
-        my $t = join(',',@files);
-        return( "\n\n".'%BIBTEXREF{ '.$style.' file="'.$t.'"}%' );
+        my $t = join( ',', @files );
+        return ( "\n\n" . '%BIBTEXREF{ ' . $style . ' file="' . $t . '"}%' );
     }
 }
 
-
 sub handleAuthor {
     my ($str) = @_;
-    my @a = split(/\\and/,$str);
-    if (scalar(@a)>1) {
-        $a[ $#a ] = ' and '.$a[ $#a  ];
-        $str = join(', ',@a );
+    my @a = split( /\\and/, $str );
+    if ( scalar(@a) > 1 ) {
+        $a[$#a] = ' and ' . $a[$#a];
+        $str = join( ', ', @a );
     }
 
-    addToTitle('<div align="center"><font size="+1">'.$str.'</font></div>');
+    addToTitle(
+        '<div align="center"><font size="+1">' . $str . '</font></div>' );
 
 }
 
 sub formInst {
     my ($str) = @_;
-    my @a = split(/\\and/,$str);
+    my @a = split( /\\and/, $str );
 
-    my $cnt =   Foswiki::Func::getContext()->{'LMPcontext'}->{'thankscnt'};
+    my $cnt = Foswiki::Func::getContext()->{'LMPcontext'}->{'thankscnt'};
     foreach (@a) {
         $cnt = $cnt + 1;
 
         Foswiki::Func::getContext()->{'LMPcontext'}->{'thanks'} .=
-            $cnt.'. '.$_."<br>\n";
+          $cnt . '. ' . $_ . "<br>\n";
 
         Foswiki::Func::getContext()->{'LMPcontext'}->{'thankscnt'} = $cnt;
     }
 }
 
-# 
-# 
+#
+#
 # :\title:1: <h1 align="center">$1</h1> :
-# 
+#
 # :\includegraphics:1:%SHOWPDF{$1}%:
 __DATA__
 :\section:1:---+ $1 \n:
