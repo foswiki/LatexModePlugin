@@ -19,7 +19,7 @@
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details, published at
+# GNU General Public License for more details, published at 
 # http://www.gnu.org/copyleft/gpl.html
 #
 # =========================
@@ -30,249 +30,212 @@ use strict;
 
 sub handleSections {
 
-    my ( $l, $e, $lbltag, $text ) = @_;
+    my ($l,$e,$lbltag,$text) = @_;
     my $cl = length($l);
 
     my $MAXDEPTH = Foswiki::Func::getContext()->{'LMPcontext'}->{'maxdepth'};
 
     my $label = '';
-    if ( $lbltag and ( $lbltag =~ m/\{(.*?)\}/ ) ) {
+    if ($lbltag and ($lbltag =~ m/\{(.*?)\}/)) {
         $label = $1;
-        $label = 'sec:' . $label unless ( $label =~ m/^sec:/ );
+        $label = 'sec:'.$label unless ($label =~ m/^sec:/);
     }
 
-    my $ret = '---' . $l . $e . ' ' . $text . " \n";
-    if ( exists( Foswiki::Func::getContext()->{'genpdflatex'} ) ) {
-        $ret .= '<latex>\label{' . $label . "}</latex>\n" if ( $label ne '' );
-        return ($ret);
+    my $ret = '---'.$l.$e.' '.$text." \n";
+    if (exists(Foswiki::Func::getContext()->{'genpdflatex'})) {
+        $ret .= '<latex>\label{'.$label."}</latex>\n" if ($label ne '');
+        return($ret);
     }
-    return ( '---' . $ret ) if ( ( $cl > $MAXDEPTH ) );
+    return('---'.$ret) if ( ($cl > $MAXDEPTH) );
 
-    Foswiki::Func::getContext()->{'LMPcontext'}->{ 'sec' . $cl . 'cnt' } += 1;
+    
+    Foswiki::Func::getContext()->{'LMPcontext'}->{'sec'.$cl.'cnt'} += 1;
 
     my $sn = '';
     for my $c ( 1 .. $cl ) {
-        $sn .=
-          Foswiki::Func::getContext()->{'LMPcontext'}->{ 'sec' . $c . 'cnt' };
+        $sn .= Foswiki::Func::getContext()->{'LMPcontext'}->{'sec'.$c.'cnt'} ;
         $sn .= '.' if $c < $cl;
     }
 
-    if ( $cl < Foswiki::Func::getContext()->{'LMPcontext'}->{'curdepth'} ) {
-        for my $c ( ( $cl + 1 ) .. $MAXDEPTH ) {
-            Foswiki::Func::getContext()->{'LMPcontext'}
-              ->{ 'sec' . $c . 'cnt' } = 0;
-        }
+    if ( $cl < Foswiki::Func::getContext()->{'LMPcontext'}->{'curdepth'} )
+    {
+        for my $c ( ($cl+1) .. $MAXDEPTH ) {
+            Foswiki::Func::getContext()->{'LMPcontext'}->{'sec'.$c.'cnt'} = 0;
+          }
     }
     Foswiki::Func::getContext()->{'LMPcontext'}->{'curdepth'} = $cl;
 
     Foswiki::Func::getContext()->{'LMPcontext'}->{'secrefs'}->{$label} = $sn;
 
     $ret = "\n<!-- ";
-    $ret .= '<nop>Sub' x ( $cl - 1 );
+    $ret .= '<nop>Sub' x ($cl-1);
     $ret .= "Section ";
     $ret .= "-->";
-    $ret .= " <a name=\"$label\"></a> " if ( $label ne '' );
+    $ret .= " <a name=\"$label\"></a> " if ($label ne '');
     $ret .= "\n---";
     $ret .= '+' x $cl;
-    $ret .= $e . " $sn. " . $text;
-    return ($ret);
+    $ret .= $e." $sn. ".$text;
+    return( $ret );
 
 }
 
 # =========================
-sub handleReferences {
+sub handleReferences
+{
+# This function converts references to defined
+# equations/figures/tables and replaces them with the Eqn/Fig/Tbl
+# number
 
-    # This function converts references to defined
-    # equations/figures/tables and replaces them with the Eqn/Fig/Tbl
-    # number
-
-    my ( $session, $params, $theTopic, $theWeb ) = @_;
+    my($session, $params, $theTopic, $theWeb) = @_;
 
     my $ref = $params->{_DEFAULT};
 
-    my ( $backref, $txt ) = ( "", "" );
+    my ($backref,$txt) = ("",""); 
 
     my %LMPc = %{ Foswiki::Func::getContext()->{'LMPcontext'} };
 
-    if ( exists( Foswiki::Func::getContext()->{'genpdflatex'} ) ) {
-        $txt = '<latex>\ref{' . $ref . '}</latex>';
+    if (exists(Foswiki::Func::getContext()->{'genpdflatex'})) {
+        $txt = '<latex>\ref{'.$ref.'}</latex>';
 
-    }
-    else {
+    } else {
 
         # my %tblrefs = %{ $LMPc{'tblrefs'} };
-        my %tblrefs =
-          defined( %{ $LMPc{'tblrefs'} } ) ? %{ $LMPc{'tblrefs'} } : ();
-        my %figrefs =
-          defined( %{ $LMPc{'figrefs'} } ) ? %{ $LMPc{'figrefs'} } : ();
-        my %eqnrefs =
-          defined( %{ $LMPc{'eqnrefs'} } ) ? %{ $LMPc{'eqnrefs'} } : ();
-        my %secrefs =
-          defined( %{ $LMPc{'secrefs'} } ) ? %{ $LMPc{'secrefs'} } : ();
-
+        my %tblrefs = defined(%{ $LMPc{'tblrefs'} }) ? %{$LMPc{'tblrefs'}} : ();
+        my %figrefs = defined(%{ $LMPc{'figrefs'} }) ? %{$LMPc{'figrefs'}} : ();
+        my %eqnrefs = defined(%{ $LMPc{'eqnrefs'} }) ? %{$LMPc{'eqnrefs'}} : ();
+        my %secrefs = defined(%{ $LMPc{'secrefs'} }) ? %{$LMPc{'secrefs'}} : ();
         # my %eqnrefs = %{ $LMPc{'eqnrefs'} };
         # print STDERR map {"$_ => $secrefs{$_}\n"} keys %secrefs;
 
-        if ( $ref =~ m/^sec\:/ ) {
-            $backref =
-              exists( $secrefs{$ref} )
-              ? $secrefs{$ref}
-              : "?? REFLATEX error: {$ref} not defined in sections list ??";
-            $txt = '<a href="#' . $ref . '">' . $backref . '</a>';
-        }
-        elsif ( $ref =~ m/^tbl\:/ ) {
-            $backref =
-              exists( $tblrefs{$ref} )
-              ? $tblrefs{$ref}
-              : "?? REFLATEX error: {$ref} not defined in table list ??";
-            $txt = '<a href="#' . $ref . '">' . $backref . '</a>';
-        }
-        elsif ( $ref =~ m/^fig\:/ ) {
-            $backref =
-              exists( $figrefs{$ref} )
-              ? $figrefs{$ref}
-              : "?? REFLATEX error: {$ref} not defined in fig list ??";
-            $txt = '<a href="#' . $ref . '">' . $backref . '</a>';
-        }
-        else {
-            if ( exists( $eqnrefs{$ref} ) ) {
-                $backref = $eqnrefs{$ref};
-            }
-            elsif ( exists( $eqnrefs{ "eqn:" . $ref } ) ) {
-                $backref = $eqnrefs{ "eqn:" . $ref };
-            }
-            else { $backref = "?? REFLATEX{$ref} not defined in eqn list ??"; }
-            $txt = '(<a href="#' . $ref . '">' . $backref . '</a>)';
-        }
+    if ($ref=~m/^sec\:/) {
+        $backref = exists($secrefs{$ref}) ? $secrefs{$ref} : "?? REFLATEX error: {$ref} not defined in sections list ??";
+        $txt = '<a href="#'.$ref.'">'.$backref.'</a>';
+    } elsif ($ref=~m/^tbl\:/) {
+        $backref = exists($tblrefs{$ref}) ? $tblrefs{$ref} : "?? REFLATEX error: {$ref} not defined in table list ??";
+        $txt = '<a href="#'.$ref.'">'.$backref.'</a>';
+    } elsif ($ref=~m/^fig\:/) {
+        $backref = exists($figrefs{$ref}) ? $figrefs{$ref} : "?? REFLATEX error: {$ref} not defined in fig list ??";
+        $txt = '<a href="#'.$ref.'">'.$backref.'</a>';
+    } else {
+        if (exists($eqnrefs{$ref})) {
+            $backref = $eqnrefs{$ref}; }
+        elsif (exists($eqnrefs{ "eqn:".$ref })) {
+            $backref = $eqnrefs{ "eqn:".$ref }; }
+        else { $backref = "?? REFLATEX{$ref} not defined in eqn list ??"; }
+        $txt = '(<a href="#'.$ref.'">'.$backref.'</a>)';
+    }
     }
 
-    return ($txt);
+    return($txt);
 }
 
 # =========================
-sub handleFloat {
-
-    # This function mimics the construction of float environments in LaTeX,
-    # producing a back-reference list for Figures and Tables.
+sub handleFloat
+{
+# This function mimics the construction of float environments in LaTeX,
+# producing a back-reference list for Figures and Tables.
 
 ### my ( $input ) = @_;   # do not uncomment, use $_[0], $_[1] instead
 
-    my $input = $_[0];
+    my $input = $_[0];	
     my $prefs = $_[1];
 
-    my %c    = %{ &Foswiki::Func::getContext() };
+    my %c = %{ &Foswiki::Func::getContext() }; 
     my %LMPc = %{ $c{'LMPcontext'} };
 
-    my @a = ( '0' .. '9', 'a' .. 'z', 'A' .. 'Z' );
-    my $str = map { $a[ int rand @a ] } ( 0 .. 7 );
-    my %opts = (
-        'label'   => $str,
-        'span'    => 'onecol',
-        'caption' => ' '
-    );
+    my @a=('0'..'9','a'..'z','A'..'Z');
+    my $str = map{ $a[ int rand @a ] } (0..7);
+    my %opts = ( 'label' => $str,
+                 'span'  => 'onecol',
+                 'caption' => ' ' );
 
     # fix inputs to catch nested Foswiki markup
-    my $cnt = 0;
-    my $tmp = '{' . $prefs . '}%' . $input;
-
+    my $cnt = 0; 
+    my $tmp = '{'.$prefs.'}%'.$input;
     # print STDERR "CrossRef: handleFloat: ".$tmp."\n";
-    while ( $tmp =~ m/(\{|\})(%?)/g ) {
-        ( $1 eq '{' ) ? $cnt++ : $cnt--;
-        last if ( ( $cnt == 0 ) and ( $2 eq '%' ) );
+    while ($tmp =~ m/(\{|\})(%?)/g) {
+        ($1 eq '{') ? $cnt++ : $cnt--;
+        last if ( ($cnt == 0) and ($2 eq '%') );
     }
-    $prefs = substr( $tmp, 1, ( pos $tmp ) - 2, '' );
-    $input = substr( $tmp, 2, length($input) );
+    $prefs = substr($tmp,1,(pos $tmp)-2,'');
+    $input = substr($tmp,2,length($input));
+    # print STDERR "CrossRef: handleFloat: ".pos($tmp)."\t".$prefs."\n\t".$input."\n";
 
-# print STDERR "CrossRef: handleFloat: ".pos($tmp)."\t".$prefs."\n\t".$input."\n";
 
-    my %opts2 = Foswiki::Func::extractParameters($prefs);
+    my %opts2 = Foswiki::Func::extractParameters( $prefs );
     map { $opts{$_} = $opts2{$_} } keys %opts2;
-
     # while ( $prefs=~ m/(.*?)=\"(.*?)\"/g ) {
     #     my ($a,$b) = ($1,$2);
     #     # remove leading/trailing whitespace from key names
-    #     $a =~ s/^\s*|\s*$//;
-    #
+    #     $a =~ s/^\s*|\s*$//;    
+    # 
     #     $opts{$a} = $b;
     # }
 
-    my $env = ( $_[2] eq 'fig' ) ? "Figure" : "Table";
-    my $tc = ( $opts{'span'} =~ m/^twoc/ ) ? '*' : '';
+    my $env = ($_[2] eq 'fig') ? "Figure" : "Table" ;
+    my $tc  = ($opts{'span'} =~ m/^twoc/) ? '*' : '' ;
 
-    # ensure that the first 4 chars of the label conform to
+    # ensure that the first 4 chars of the label conform to 
     # 'fig:' or 'tbl:' or ...
-    ( $opts{'label'} = $_[2] . ":" . $opts{'label'} )
-      unless ( substr( $opts{'label'}, 0, 4 ) eq $_[2] . ':' );
-
+    ( $opts{'label'} = $_[2].":".$opts{'label'} )
+        unless ( substr($opts{'label'},0,4) eq $_[2].':' );
+        
     # print STDERR map {" $_ => $opts{$_}\n" } keys %opts;
     my $txt2 = "";
-    if ( exists( Foswiki::Func::getContext()->{'genpdflatex'} ) )
-    {    ## for genpdflatex
-            # latex new-lines, '\\', get translated to spaces, '\', but if
-            # they appear at the end of the line.  So pad in a few spaces
-            # to protect them...
+    if( exists(Foswiki::Func::getContext()->{'genpdflatex'}) ) {           ## for genpdflatex
+        # latex new-lines, '\\', get translated to spaces, '\', but if
+        # they appear at the end of the line.  So pad in a few spaces
+        # to protect them...
         $input =~ s!\n!  \n!g;
 
         $txt2 = '<latex>';
-        $txt2 .= "\n\\begin{" . lc($env) . $tc . "}\\centering\n";
-        $txt2 .= $input . "\n\\caption{" . $opts{'caption'} . "}\n";
-        $txt2 .=
-          '\label{' . $opts{'label'} . "}\n\\end{" . lc($env) . $tc . "}";
+        $txt2 .= "\n\\begin{".lc($env).$tc."}\\centering\n";
+        $txt2 .= $input."\n\\caption{".$opts{'caption'}."}\n";
+        $txt2 .= '\label{'.$opts{'label'}."}\n\\end{".lc($env).$tc."}";
         $txt2 .= '</latex>';
-
-    }
-    else {
+        
+    } else {
         ## otherwise, generate HTML ...
 
-        my %figrefs =
-          defined( %{ $LMPc{'figrefs'} } ) ? %{ $LMPc{'figrefs'} } : ();
-        my %tblrefs =
-          defined( %{ $LMPc{'tblrefs'} } ) ? %{ $LMPc{'tblrefs'} } : ();
+        my %figrefs = defined(%{ $LMPc{'figrefs'} }) ? %{$LMPc{'figrefs'}} : ();
+        my %tblrefs = defined(%{ $LMPc{'tblrefs'} }) ? %{$LMPc{'tblrefs'}} : ();
 
         my $infrmt = '<tr><td><td align="center">%s</td><td></tr>';
-        my $cpfrmt =
-'<tr><td><td width="90%%" id="lmp-caption"> *%s %d*: %s</td><td></tr>';
+        my $cpfrmt = '<tr><td><td width="90%%" id="lmp-caption"> *%s %d*: %s</td><td></tr>';
 
-        if ( $_[2] eq 'fig' ) {
+        if ($_[2] eq 'fig') {
             $LMPc{'fig'}++;
-
-            $txt2 .=
-                sprintf( $infrmt . "\n", $input )
-              . sprintf( $cpfrmt . "\n", $env, $LMPc{'fig'}, $opts{'caption'} );
-
+            
+            $txt2 .= sprintf($infrmt."\n",$input).
+                sprintf($cpfrmt."\n",$env,$LMPc{'fig'},$opts{'caption'});
+                
             my $key = $opts{'label'};
             $figrefs{$key} = $LMPc{'fig'};
-
-        }
-        elsif ( $_[2] eq 'tbl' ) {
+            
+        } elsif ($_[2] eq 'tbl') {
             $LMPc{'tbl'}++;
-
-            $txt2 .=
-                sprintf( $cpfrmt . "\n", $env, $LMPc{'tbl'}, $opts{'caption'} )
-              . sprintf( $infrmt . "\n", $input );
-
+            
+            $txt2 .= sprintf($cpfrmt."\n",$env,$LMPc{'tbl'},$opts{'caption'}).
+                sprintf($infrmt."\n",$input);
+            
             my $key = $opts{'label'};
             $tblrefs{$key} = $LMPc{'tbl'};
-        }
-        else {
+        } else {
             $txt2 .= $input;
         }
-        $txt2 =
-            '<a name="'
-          . $opts{'label'}
-          . '"></a>'
-          . '<table width="100%" border=0>' . "\n"
-          . $txt2
-          . '</table>';
+        $txt2 = '<a name="'.$opts{'label'}.'"></a>' .
+            '<table width="100%" border=0>'."\n" .
+            $txt2 .
+            '</table>';
 
         $LMPc{'tblrefs'} = \%tblrefs;
         $LMPc{'figrefs'} = \%figrefs;
 
         Foswiki::Func::getContext()->{'LMPcontext'} = \%LMPc;
+        
+    } # end. if !($latexout)
 
-    }    # end. if !($latexout)
-
-    return ($txt2);
+    return($txt2);
 }
 
 1;

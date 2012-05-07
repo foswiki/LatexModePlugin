@@ -17,7 +17,7 @@
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details, published at
+# GNU General Public License for more details, published at 
 # http://www.gnu.org/copyleft/gpl.html
 #
 # =========================
@@ -44,8 +44,9 @@
 
 ### for custom styles, LaTeX needs to know where to find them.  The
 ### easiest way is to use a texmf tree below 'HOME'
-$ENV{'HOME'} = $Foswiki::cfg{Plugins}{LatexModePlugin}{home}
-  || '/home/nobody';
+$ENV{'HOME'} = $Foswiki::cfg{Plugins}{LatexModePlugin}{home} ||
+    '/home/nobody';
+
 
 # =========================
 package Foswiki::Plugins::LatexModePlugin;
@@ -54,47 +55,44 @@ use strict;
 
 # =========================
 use vars qw( $VERSION $RELEASE $debug
-  $sandbox $initialized
-);
-
+             $sandbox $initialized
+             );
 #             @EXPORT_OK
-#             $user $installWeb
+#             $user $installWeb 
 #             $default_density $default_gamma $default_scale $preamble
 #             $eqn $fig $tbl $use_color @norender $tweakinline $rerender
+
 
 # number the release version of this plugin
 our $VERSION = '$Rev$';
 our $RELEASE = '4.0';
-
 # our $SHORTDESCRIPTION = 'Enables <nop>LaTeX markup (mathematics and more) in Foswiki topics';
 
 # =========================
-sub initPlugin {
+sub initPlugin
+{
     my ( $topic, $web, $user, $installWeb ) = @_;
 
     # check for Plugins.pm versions
-    if ( $Foswiki::Plugins::VERSION < 1.025 ) {
-
+    if( $Foswiki::Plugins::VERSION < 1.025 ) { 
         # this version is Foswiki compatible
-        &Foswiki::Func::writeWarning(
-            "Version mismatch between LatexModePlugin and Plugins.pm");
+        &Foswiki::Func::writeWarning( "Version mismatch between LatexModePlugin and Plugins.pm" );
         return 0;
     }
 
     #get the relative URL to the attachment directory for this page
-    # $pubUrlPath = # &Foswiki::Func::getUrlHost() .
+    # $pubUrlPath = # &Foswiki::Func::getUrlHost() . 
     #     &Foswiki::Func::getPubUrlPath() . "/$web/$topic";
-
+    
     # Get preferences values
-    $debug = &Foswiki::Func::getPreferencesFlag("LATEXMODEPLUGIN_DEBUG");
+    $debug = &Foswiki::Func::getPreferencesFlag( "LATEXMODEPLUGIN_DEBUG" );
 
     $initialized = 0;
 
-    if ( $Foswiki::Plugins::VERSION >= 1.1 ) {
-        $sandbox = $Foswiki::sharedSandbox
-          || $Foswiki::sandbox;    # for Foswiki 1.0.0
-    }
-    else {
+    if( $Foswiki::Plugins::VERSION >= 1.1 ) {
+        $sandbox = $Foswiki::sharedSandbox || 
+            $Foswiki::sandbox;    # for Foswiki 1.0.0
+    } else {
         $sandbox = undef;
     }
 
@@ -103,35 +101,36 @@ sub initPlugin {
     return 1;
 }
 
-sub commonTagsHandler {
+
+sub commonTagsHandler
+{
 ### my ( $text, $topic, $web ) = @_;   # do not uncomment, use $_[0], $_[1]... instead
 
     ######################################################
 
     if ( !($initialized) ) {
-        if (   ( $_[0] =~ m/%(REFLATEX|MATHMODE){.*?}%/ )
-            || ( $_[0] =~ m/%BEGINALLTEX.*?%/ )
-            || ( $_[0] =~ m/%SECLABEL.*?%/ )
-            || ( $_[0] =~ m/%BEGINLATEX.*?%/ )
-            || ( $_[0] =~ m/%BEGIN(FIGURE|TABLE){.*?}%/ )
-            || ( ( $_[0] =~ m/%\$/ )   and ( $_[0] =~ m/\$%/ ) )
-            || ( ( $_[0] =~ m/%\\\[/ ) and ( $_[0] =~ m/\\\]%/ ) ) )
-        {
-            require Foswiki::Plugins::LatexModePlugin::Init;
+        if ( ($_[0]=~m/%(REFLATEX|MATHMODE){.*?}%/) ||
+             ($_[0]=~m/%BEGINALLTEX.*?%/)  ||
+             ($_[0]=~m/%SECLABEL.*?%/)  ||
+             ($_[0]=~m/%BEGINLATEX.*?%/)  ||
+             ($_[0]=~m/%BEGIN(FIGURE|TABLE){.*?}%/) ||
+             ( ($_[0] =~ m/%\$/) and ($_[0] =~ m/\$%/) ) || 
+             ( ($_[0] =~ m/%\\\[/) and ($_[0] =~ m/\\\]%/) )
+             ) 
+        {   require Foswiki::Plugins::LatexModePlugin::Init;
             require Foswiki::Plugins::LatexModePlugin::Render;
             require Foswiki::Plugins::LatexModePlugin::CrossRef;
             eval(" require Foswiki::Plugins::LatexModePlugin::Parse;");
-            $initialized = &Foswiki::Plugins::LatexModePlugin::Init::doInit();
+            $initialized = &Foswiki::Plugins::LatexModePlugin::Init::doInit(); 
         }
-        else { return; }
+        else 
+        { return; }
     }
 
     Foswiki::Func::getContext()->{'LMPcontext'}->{'topic'} = $_[1];
-    Foswiki::Func::getContext()->{'LMPcontext'}->{'web'}   = $_[2];
+    Foswiki::Func::getContext()->{'LMPcontext'}->{'web'} = $_[2];
 
-    Foswiki::Func::writeDebug(
-        " Foswiki::Plugins::LatexModePlugin::commonTagsHandler( $_[2].$_[1] )")
-      if $debug;
+    Foswiki::Func::writeDebug( " Foswiki::Plugins::LatexModePlugin::commonTagsHandler( $_[2].$_[1] )" ) if $debug;
 
     # This is the place to define customized tags and variables
     # Called by sub handleCommonTags, after %INCLUDE:"..."%
@@ -141,79 +140,80 @@ sub commonTagsHandler {
 
     ### pass through text to assign labels to section numbers
     ###
-    $_[0] =~
-s!---(\++)(\!*)\s*(%SECLABEL{.*?}%)?\s(.*?)\n!&handleSections($1,$2,$3,$4) !gseo;
+    $_[0] =~ s!---(\++)(\!*)\s*(%SECLABEL{.*?}%)?\s(.*?)\n!&handleSections($1,$2,$3,$4) !gseo;
 
     # handle floats first, in case of latex markup in captions.
-    $_[0] =~
-      s!%BEGINFIGURE{(.*?)}%(.*?)%ENDFIGURE%!&handleFloat($2,$1,'fig')!giseo;
-    $_[0] =~
-      s!%BEGINTABLE{(.*?)}%(.*?)%ENDTABLE%!&handleFloat($2,$1,'tbl')!giseo;
+    $_[0] =~ s!%BEGINFIGURE{(.*?)}%(.*?)%ENDFIGURE%!&handleFloat($2,$1,'fig')!giseo;
+    $_[0] =~ s!%BEGINTABLE{(.*?)}%(.*?)%ENDTABLE%!&handleFloat($2,$1,'tbl')!giseo;
 
     ### handle the standard syntax next
     $_[0] =~ s/%(\$.*?\$)%/&handleLatex($1,'inline="1"')/gseo;
     $_[0] =~ s/%(\\\[.*?\\\])%/&handleLatex($1,'inline="0"')/gseo;
     $_[0] =~ s/%MATHMODE{(.*?)}%/&handleLatex("\\[".$1."\\]",'inline="0"')/gseo;
-
+    
     # pass everything between the latex BEGIN and END tags to the handler
-    #
+    # 
     $_[0] =~ s!%BEGINLATEX{(.*?)}%(.*?)%ENDLATEX%!&handleLatex($2,$1)!giseo;
     $_[0] =~ s!%BEGINLATEX%(.*?)%ENDLATEX%!&handleLatex($1,'inline="0"')!giseo;
-    $_[0] =~
-      s!%BEGINLATEXPREAMBLE%(.*?)%ENDLATEXPREAMBLE%!&handlePreamble($1)!giseo;
+    $_[0] =~ s!%BEGINLATEXPREAMBLE%(.*?)%ENDLATEXPREAMBLE%!&handlePreamble($1)!giseo;
 
     # last, but not least, replace the references to equations with hyperlinks
     # $_[0] =~ s!%REFLATEX{(.*?)}%!&handleReferences($1)!giseo;
 }
 
 # =========================
-sub handleAlltex {
+sub handleAlltex
+{
     return unless ($initialized);
 
     &Foswiki::Plugins::LatexModePlugin::Parse::handleAlltex(@_);
 }
 
 # =========================
-sub handleFloat {
+sub handleFloat
+{
     return unless ($initialized);
 
     &Foswiki::Plugins::LatexModePlugin::CrossRef::handleFloat(@_);
 }
 
 # =========================
-sub handleSections {
+sub handleSections
+{
     return unless ($initialized);
 
     &Foswiki::Plugins::LatexModePlugin::CrossRef::handleSections(@_);
 }
 
 # =========================
-sub handleReferences {
+sub handleReferences
+{
     return unless ($initialized);
 
     &Foswiki::Plugins::LatexModePlugin::CrossRef::handleReferences(@_);
 }
 
 # =========================
-sub handleLatex {
+sub handleLatex
+{
     return unless ($initialized);
 
     &Foswiki::Plugins::LatexModePlugin::Render::handleLatex(@_);
 }
 
 # =========================
-sub handlePreamble {
-    my $text = $_[0];
+sub handlePreamble
+{
+    my $text = $_[0];	
 
     Foswiki::Func::getContext()->{'LMPcontext'}->{'preamble'} .= $text;
 
-    return ('');
+    return('');
 }
 
 # =========================
-sub afterCommonTagsHandler    # postRenderingHandler
+sub afterCommonTagsHandler # postRenderingHandler
 {
-
 # Here we check if we saw any math, try to delete old files, render new math, and clean up
 ### my ( $text ) = @_;   # do not uncomment, use $_[0] instead
 
@@ -222,8 +222,10 @@ sub afterCommonTagsHandler    # postRenderingHandler
     &Foswiki::Plugins::LatexModePlugin::Render::renderEquations(@_);
 }
 
+
 # =========================
 
 1;
+
 
 __DATA__
