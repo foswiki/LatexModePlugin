@@ -224,7 +224,7 @@ sub handleFloat
             $txt2 .= $input;
         }
         $txt2 = '<a name="'.$opts{'label'}.'"></a>' .
-            '<table width="100%" border=0>'."\n" .
+            '<table width="100%" border="0">'."\n" .
             $txt2 .
             '</table>';
 

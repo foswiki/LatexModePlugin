@@ -350,15 +350,15 @@ COLORS
             $LMPc{'eqn'}++;
             
             $txt = '<a name="'.$opts{'label'}.'"></a>'.
-                '<table width="100%" border=0><tr>'."\n".
-                '<td width=10>&nbsp;</td>'.
+                '<table width="100%" border="0"><tr>'."\n".
+                '<td width="10">&nbsp;</td>'.
                 '<td width="100%" align="center">'.
                 "<img src=\"$image_name\" $str alt=\"$escaped\" /></td>".
-                "<td width=10>(".
+                '<td width="10">('.
                 '<a href="#'.$opts{'label'}.'" title="'.$opts{'label'}.'">'.
                 $LMPc{'eqn'}.
                 '</a>'.
-                ")</dt></tr></table>\n";
+                ")</td></tr></table>\n";
             
             if ( exists( $eqnrefs{ $opts{'label'} } ) ) {
                 $LMPc{'error_catch_all'} .= 
