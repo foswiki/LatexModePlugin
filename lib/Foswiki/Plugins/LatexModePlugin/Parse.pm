@@ -495,7 +495,7 @@ sub expandComplexBlocks {
         $str = extractBlocks($str) if ($str =~ m/\\/); 
         # convertSimple($str) if ($str =~ m/\\/); 
         
-        if (defined($cmd)) {
+        if ($cmd) {
             $str =~ s/^(\"|\')|(\"|\')$//g;
             printF("Try dynamic command: $cmd($str)\n");
             my @z = grep(@regSubs,$cmd);
@@ -674,9 +674,9 @@ sub extractBlocks {
                                          ([\\\w\d\.\=\,\s]+?)
                                          \])?$!!xs) # test for a latex command;
                  );
-            $star = '' unless defined($star);
+            $star = '' unless ($star);
             printF( "\nFound command: $cmd$star ") if ($cmd ne '');
-            (defined($opts) and ($opts ne '') ) ?
+            (($opts) and ($opts ne '') ) ?
                 printF(" opts = $opts \n") : printF("\n");
 
             if ($cmd =~ m!\\[\`\"\'\^\~\.duvtbH]$!) {
@@ -699,7 +699,7 @@ sub extractBlocks {
                         $t = ' %SECLABEL{'.$t.'}% ';
                         $txt =~ s/(---\++\!?\s+)([\w\s\$\%\\]+)$/$1$t$2/s;
                     } else {
-                        # (defined($opts)) ?
+                        # ($opts) ?
                         # $b =~ s/\$cmd\*?\Q$opts\E//;
                         # $b =~ s/\$cmd\*?//;
                         $txt .= $b;
@@ -714,8 +714,8 @@ sub extractBlocks {
                         my $s1 = "%BEGINLATEX<nop>% "; 
                         # $b =~ s/(\\[\"\'\`\^\~\.\w]+)$/$s1$1/;
                         $s1 .= $cmd;
-                        $s1 .= $star if defined($star);
-                        $s1 .= $opts if defined($opts);
+                        $s1 .= $star if ($star);
+                        $s1 .= $opts if ($opts);
                         $b = $s1.$b;
                         # if the first character of the next block is a brace, it
                         # likely means we have a complex command...  So group

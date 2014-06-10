@@ -144,7 +144,10 @@ sub handleLatex
 
     my %LMPc = %{ Foswiki::Func::getContext()->{'LMPcontext'} };
 
-    my %eqnrefs = defined(%{ $LMPc{'eqnrefs'} }) ? %{$LMPc{'eqnrefs'}} : ();
+    my %eqnrefs = ();
+    if ( $LMPc{'eqnrefs'} ) { 
+        %eqnrefs = %{$LMPc{'eqnrefs'}};
+    }
 
     # remove latex-common HTML entities from within math env
     $math_string =~ s/\<br\s*\/\>//og;
@@ -180,7 +183,8 @@ sub handleLatex
         # type inputs). alpha-numeric OK. slash, space, and brackets
         # are valid in preamble. need semi-colon in eqn lables!
         # allow '-' and '_' in eqn labels too.
-        $b =~ m/([\.\\\w\s\:\-\_\{\}]+)/; 
+        # added a ',', to allow multiple attachments.
+        $b =~ m/([\,\.\\\w\s\:\-\_\{\}]+)/; 
         $b = $1;
 
         $opts{$a} = $b;
@@ -422,7 +426,7 @@ sub createTempLatexFiles {
         
         # restore the declared rendering options
         my %opts = %{ $markup_opts{$key} };
-        # my %opts = defined($LMPc{'markup_opts'}{$key}) ? %{$LMPc{'markup_opts'}{$key}} : ();
+        # my %opts = ($LMPc{'markup_opts'}{$key}) ? %{$LMPc{'markup_opts'}{$key}} : ();
 
         $value =~ s/\n\s*?\n/\n/gs;
         # disable commands flagged as 'do not render'
@@ -432,20 +436,26 @@ sub createTempLatexFiles {
         }
 
         if( exists($opts{'attachment'}) ) {
+
+	    $markup_opts{$key}->{'attachment'} = $opts{'attachment'};
             # copy image attachments to the working directory
+
+	    &Foswiki::Func::writeDebug( "copy opts{'attachment'} = ".$opts{'attachment'} ) if $debug;
+            foreach my $fname (split(/,/,$opts{'attachment'})) {
 
             my ($ext,$af) = ('','');
             my @extlist = ('','.eps','.eps.gz','.pdf','.png','.jpg');
+
             if ( ( $Foswiki::Plugins::VERSION < 1.1 ) or
                  ( $bypassattach ) ) { 
                 # filesystem interface
                 
                 $af = join( $pathSep, &Foswiki::Func::getPubDir(),
                             $LMPc{'web'}, $LMPc{'topic'},
-                            $opts{'attachment'} );
-                
-                $af = Foswiki::Sandbox::normalizeFileName( $af );
+                            $fname );
 
+                $af = Foswiki::Sandbox::normalizeFileName( $af );
+                print "render attachment name: $fname\n";
                 foreach my $e (@extlist) {
                     $ext = $e;
                     if (-f $af.$ext) {
@@ -454,19 +464,20 @@ sub createTempLatexFiles {
                         # copy( $af.$ext, $LATEXWDIR ) || do {
                         copy( $af.$ext, "." ) || do {
                             &Foswiki::Func::writeDebug( "LatexModePlugin: copy failed ".$! );
-                            $value = "attachment \{".$markup_opts{$key}->{'attachment'}."\} \ not found";
+                            $value .= "attachment \{".$af.$ext."\} \ not found";
                         };
-                        $markup_opts{$key}->{'attachment'} .= $ext;
                         
                         if ($ext ne '') {
                             # if the Plugin chooses the extension, then
                             # set the rendering engine as well.
+			    $markup_opts{$key}->{'attachment'} =~ s/$fname/$fname$ext/;
                             if ($ext =~ m/\.eps/) {
                                 $markup_opts{$key}->{'engine'} = 'ps';
                             } else {
                                 $markup_opts{$key}->{'engine'} = 'pdf';
                             }
                         }
+                        $fname .= $ext;
 
                         last;
                     }
@@ -474,23 +485,24 @@ sub createTempLatexFiles {
             } else {
                 # database interface
                 my $ext;
-                my $af= $opts{'attachment'};
+                my $af= $fname;
                 foreach my $e (@extlist) {
                     $ext = $e;
                     if ( Foswiki::Func::attachmentExists( $LMPc{'web'},
                                                         $LMPc{'topic'},
                                                         $af.$ext ) ) {
                         
-                        $markup_opts{$key}->{'attachment'} .= $ext;
                         if ($ext ne '') {
                             # if the Plugin chooses the extension, then
                             # set the rendering engine as well.
+			    $markup_opts{$key}->{'attachment'} =~ s/$fname/$fname$ext/;
                             if ($ext =~ m/\.eps/) {
                                 $markup_opts{$key}->{'engine'} = 'ps';
                             } else {
                                 $markup_opts{$key}->{'engine'} = 'pdf';
                             }
                         }
+                        $fname .= $ext;
 
                         open(F,">".'.'.$pathSep.$af.$ext);
                         print F Foswiki::Func::readAttachment( $LMPc{'web'},
@@ -501,11 +513,12 @@ sub createTempLatexFiles {
                     }
                 }
             }
-        } # end of copy attachment piece
-        $value = " (attachment ".$markup_opts{$key}->{'attachment'}." not found) "
-            if ( exists($markup_opts{$key}->{'attachment'}) and
-                 !(-f $markup_opts{$key}->{'attachment'}) );
 
+            $value .= " (attachment ".$fname." not found) "
+                if ( exists($markup_opts{$key}->{'attachment'}) and
+                     !(-f $fname) );
+            }
+        } # end of copy attachment piece
 
         &Foswiki::Func::writeDebug( "LatexModePlugin: ".
                                   $value . " :: " .
@@ -571,7 +584,7 @@ sub renderEquations {
     #&Foswiki::Func::writeDebug( "- LatexModePlugin: @revinfo" ) if $debug;
 
     #check if there was any math in this document
-    return unless defined( $LMPc{'hashed_math_strings'} );
+    return unless ( $LMPc{'hashed_math_strings'} );
     # return unless scalar( keys( %hashed_math_strings ) );
 
     ## 'halt-on-error' is not supported in older versions of tetex, so check to see if it exists:
@@ -620,7 +633,7 @@ sub renderEquations {
         # database interface
         my ( $meta, undef ) = Foswiki::Func::readTopic( $LMPc{'web'}, $LMPc{'topic'} );
 
-        if ( defined( $meta->{FILEATTACHMENT} ) ) {
+        if ( $meta->{FILEATTACHMENT} ) {
             foreach my $c ( @{ $meta->{FILEATTACHMENT} } ) {
                 $extfiles{$c}->{name} = $c->{name};
                 $extfiles{$c}->{date} = $c->{date} || 0;
@@ -826,7 +839,7 @@ sub renderEquations {
             $_[0] .= "<br>Latex rendering error!! pdf file was not created.<br>";
             
             $_[0] .= "<pre>";
-            open(LF,"$LATEXBASENAME.log");
+            open(LF,"pdf_$LATEXBASENAME.log");
             while (<LF>) {
                 $_[0] .= $_ if (m/Error/);
             }
@@ -845,10 +858,12 @@ sub renderEquations {
             my %opts = %{ $markup_opts{$key} };
             
             if( exists($opts{'attachment'}) ) {
+		&Foswiki::Func::writeDebug( "unlink opts{'attachment'} = ".$opts{'attachment'} ) if $debug;
                 # delete image attachments from the working directory
-                my $af = join( '/', $LATEXWDIR,
-                               $opts{'attachment'} );
-                unlink($af);
+                foreach my $fname (split(/,/,$opts{'attachment'})) {
+		    my $af = join( '/', $LATEXWDIR, $fname );
+		    unlink($af);
+                }
             }
             
             if ( $opts{'engine'} eq 'mimetex' ) {

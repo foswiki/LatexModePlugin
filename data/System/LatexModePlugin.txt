@@ -424,6 +424,8 @@ This plugin is an enhanced version of the Foswiki:Extensions.MathModePlugin main
 |  Plugin Author: | Foswiki:Main.ScottHoge |
 |  Plugin Version: | 27 Aug 2009 (v 4.0, SVN:%$VERSION%)  |
 |  Change History: | %ICON{warning}% v4.0 and above requires Foswiki 1.x.x and above %ICON{warning}% <!-- versions below in reverse order --> |
+|   10 Jun 2014 (v 4.2) | removed all use of depreciated function 'defined' |
+|   15 Jun 2010 (v 4.1) | added option for multiple attachments in !LaTeX rendering |
 |   27 Aug 2009 (v 4.0) | Ported to Foswiki and fixed a few bugs. |
 |  Change History: | %ICON{warning}% v3.x requires TWiki 4.x.x and above %ICON{warning}% <!-- versions below in reverse order --> |
 |   27 Oct 2008 (v 3.74) | replaced plugin init with lazy-loading, to fix installer bug |

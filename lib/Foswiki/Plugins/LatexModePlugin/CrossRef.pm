@@ -100,10 +100,11 @@ sub handleReferences
     } else {
 
         # my %tblrefs = %{ $LMPc{'tblrefs'} };
-        my %tblrefs = defined(%{ $LMPc{'tblrefs'} }) ? %{$LMPc{'tblrefs'}} : ();
-        my %figrefs = defined(%{ $LMPc{'figrefs'} }) ? %{$LMPc{'figrefs'}} : ();
-        my %eqnrefs = defined(%{ $LMPc{'eqnrefs'} }) ? %{$LMPc{'eqnrefs'}} : ();
-        my %secrefs = defined(%{ $LMPc{'secrefs'} }) ? %{$LMPc{'secrefs'}} : ();
+        # my %tblrefs = defined(%{ $LMPc{'tblrefs'} }) ? %{$LMPc{'tblrefs'}} : ();
+        my %tblrefs = (ref($LMPc{'tblrefs'}) eq 'HASH') ? %{$LMPc{'tblrefs'}} : ();
+        my %figrefs = (ref($LMPc{'figrefs'}) eq 'HASH') ? %{$LMPc{'figrefs'}} : ();
+        my %eqnrefs = (ref($LMPc{'eqnrefs'}) eq 'HASH') ? %{$LMPc{'eqnrefs'}} : ();
+        my %secrefs = (ref($LMPc{'secrefs'}) eq 'HASH') ? %{$LMPc{'secrefs'}} : ();
         # my %eqnrefs = %{ $LMPc{'eqnrefs'} };
         # print STDERR map {"$_ => $secrefs{$_}\n"} keys %secrefs;
 
@@ -197,8 +198,8 @@ sub handleFloat
     } else {
         ## otherwise, generate HTML ...
 
-        my %figrefs = defined(%{ $LMPc{'figrefs'} }) ? %{$LMPc{'figrefs'}} : ();
-        my %tblrefs = defined(%{ $LMPc{'tblrefs'} }) ? %{$LMPc{'tblrefs'}} : ();
+        my %figrefs = (ref($LMPc{'figrefs'}) eq 'HASH') ? %{$LMPc{'figrefs'}} : ();
+        my %tblrefs = (ref($LMPc{'tblrefs'}) eq 'HASH') ? %{$LMPc{'tblrefs'}} : ();
 
         my $infrmt = '<tr><td><td align="center">%s</td><td></tr>';
         my $cpfrmt = '<tr><td><td width="90%%" id="lmp-caption"> *%s %d*: %s</td><td></tr>';

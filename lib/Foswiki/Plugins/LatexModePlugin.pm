@@ -57,15 +57,10 @@ use strict;
 use vars qw( $VERSION $RELEASE $debug
              $sandbox $initialized
              );
-#             @EXPORT_OK
-#             $user $installWeb 
-#             $default_density $default_gamma $default_scale $preamble
-#             $eqn $fig $tbl $use_color @norender $tweakinline $rerender
-
 
 # number the release version of this plugin
 our $VERSION = '$Rev$';
-our $RELEASE = '4.0';
+our $RELEASE = '4.2';
 # our $SHORTDESCRIPTION = 'Enables <nop>LaTeX markup (mathematics and more) in Foswiki topics';
 
 # =========================
